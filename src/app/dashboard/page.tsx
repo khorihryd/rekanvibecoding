@@ -125,7 +125,6 @@ export default function Home() {
 
   // Navigation & UI States
   const [activeTab, setActiveTab] = useState<'chat' | 'docs' | 'board' | 'repo' | 'verify'>('chat');
-  const [selectedProject, setSelectedProject] = useState('rekanvibecoding');
   const [selectedModel, setSelectedModel] = useState('claude-3-5-sonnet');
   const [githubRepo, setGithubRepo] = useState('https://github.com/khori/rekanvibecoding');
   const [logs, setLogs] = useState<string[]>([]);
@@ -134,6 +133,96 @@ export default function Home() {
     { id: '1', text: 'CSA diinisialisasi untuk project rekanvibecoding', type: 'success' },
     { id: '2', text: 'File AGENTS.md berhasil dibuat di root repository', type: 'info' }
   ]);
+
+  // Projects & Database State
+  const [projects, setProjects] = useState<any[]>([]);
+  const [activeProject, setActiveProject] = useState<any>(null);
+  const [fetchingProjects, setFetchingProjects] = useState(true);
+  
+  // Create Project Form State
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newRepoUrl, setNewRepoUrl] = useState('');
+  const [newInstallationId, setNewInstallationId] = useState('');
+
+  const fetchProjects = async () => {
+    if (!user) return;
+    try {
+      setFetchingProjects(true);
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setProjects(data || []);
+      if (data && data.length > 0) {
+        setActiveProject((prev: any) => {
+          if (!prev) {
+            setGithubRepo(data[0].github_repo_url || '');
+            return data[0];
+          }
+          const updated = data.find(p => p.id === prev.id);
+          if (updated) {
+            setGithubRepo(updated.github_repo_url || '');
+            return updated;
+          }
+          setGithubRepo(data[0].github_repo_url || '');
+          return data[0];
+        });
+      } else {
+        setActiveProject(null);
+      }
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+    } finally {
+      setFetchingProjects(false);
+    }
+  };
+
+  const handleCreateProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProjectName.trim() || !user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([
+          {
+            user_id: user.id,
+            name: newProjectName,
+            github_repo_url: newRepoUrl || null,
+            github_installation_id: newInstallationId || null
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+
+      setIsCreateModalOpen(false);
+      setNewProjectName('');
+      setNewRepoUrl('');
+      setNewInstallationId('');
+
+      setLogs(prev => [...prev, `[System] Proyek "${newProjectName}" berhasil dibuat.`]);
+      
+      await fetchProjects();
+      if (data && data.length > 0) {
+        setActiveProject(data[0]);
+        setGithubRepo(data[0].github_repo_url || '');
+      }
+    } catch (err: any) {
+      alert('Gagal membuat proyek: ' + err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchProjects();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // Mock Database State (in-memory, loaded from/to localStorage)
   const [decisions, setDecisions] = useState<Decision[]>([]);
@@ -713,7 +802,11 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
             </h1>
             <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
               <GithubIcon size={12} className="text-slate-500" />
-              <span>khori/rekanvibecoding</span>
+              <span>
+                {activeProject?.github_repo_url 
+                  ? activeProject.github_repo_url.replace('https://github.com/', '') 
+                  : 'Belum terhubung ke repo'}
+              </span>
               <span className="text-slate-600">•</span>
               <span className="text-emerald-400 font-mono">webhook active</span>
             </p>
@@ -722,18 +815,38 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
 
         {/* Global Action / Settings in Header */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-indigo-950/40 border border-indigo-900/30 rounded-lg p-1">
-            <button 
-              onClick={() => setSelectedProject('rekanvibecoding')} 
-              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors ${selectedProject === 'rekanvibecoding' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+          <div className="flex items-center gap-2 bg-indigo-950/40 border border-indigo-900/30 rounded-lg px-2 py-1">
+            <span className="text-xs text-slate-400 font-medium">Proyek:</span>
+            <select
+              value={activeProject?.id || ''}
+              onChange={(e) => {
+                const proj = projects.find(p => p.id === e.target.value);
+                if (proj) {
+                  setActiveProject(proj);
+                  setGithubRepo(proj.github_repo_url || '');
+                  setLogs(prev => [...prev, `[System] Beralih ke proyek: ${proj.name}`]);
+                }
+              }}
+              className="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-semibold"
             >
-              rekanvibecoding
-            </button>
-            <button 
-              onClick={() => setSelectedProject('another-saas')} 
-              className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors ${selectedProject === 'another-saas' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+              {fetchingProjects ? (
+                <option value="">Memuat...</option>
+              ) : projects.length === 0 ? (
+                <option value="">Tidak ada proyek</option>
+              ) : (
+                projects.map(p => (
+                  <option key={p.id} value={p.id} className="bg-[#0f111a] text-slate-200">
+                    {p.name}
+                  </option>
+                ))
+              )}
+            </select>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="text-xs ml-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded transition-colors cursor-pointer flex items-center gap-1 font-semibold"
             >
-              SaaS Tracker (Locked)
+              <Plus size={10} />
+              <span>Baru</span>
             </button>
           </div>
 
@@ -880,8 +993,30 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
         {/* Content Pane */}
         <main className="flex-1 flex flex-col bg-[#080b12] overflow-hidden">
           
-          {/* Main Workspace Area (Rendering Selected Tab) */}
-          <div className="flex-1 overflow-y-auto p-6">
+          {projects.length === 0 && !fetchingProjects ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 relative">
+              <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#6366f1] opacity-[0.03] blur-[120px] pointer-events-none" />
+              <div className="max-w-md w-full text-center space-y-6 glass-panel rounded-2xl border border-indigo-950/40 p-8 shadow-2xl z-10">
+                <div className="inline-flex h-14 w-14 rounded-2xl bg-indigo-600/10 border border-indigo-500/30 items-center justify-center text-indigo-400 mb-2">
+                  <FolderGit2 size={32} />
+                </div>
+                <h2 className="text-lg font-bold text-gradient">Belum Ada Proyek Terhubung</h2>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Anda belum memiliki proyek apapun yang terdaftar di CSA. Silakan buat proyek baru untuk mulai merancang arsitektur dan mengawasi pekerjaan AI Engineer Anda.
+                </p>
+                
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-950/50 cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Buat Proyek Pertama Anda</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Main Workspace Area (Rendering Selected Tab) */
+            <div className="flex-1 overflow-y-auto p-6">
             
             {/* 💬 TAB: BRAINSTORM CHAT */}
             {activeTab === 'chat' && (
@@ -1516,6 +1651,7 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
             )}
 
           </div>
+          )}
         </main>
 
         {/* Right Panel: Simulator Control Center */}
@@ -1623,6 +1759,70 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
         </aside>
 
       </div>
+
+      {/* Create Project Modal */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md glass-panel rounded-2xl border border-indigo-950/40 p-6 shadow-2xl relative animate-fade-in">
+            <h3 className="text-base font-bold text-slate-200 mb-4 text-gradient flex items-center gap-2">
+              <FolderGit2 size={18} className="text-indigo-400" />
+              <span>Buat Proyek Baru</span>
+            </h3>
+            
+            <form onSubmit={handleCreateProject} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-400">Nama Proyek</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: My SaaS App"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  className="w-full bg-slate-950/60 border border-indigo-950/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-400">GitHub Repository URL</label>
+                <input
+                  type="url"
+                  placeholder="https://github.com/username/repo"
+                  value={newRepoUrl}
+                  onChange={(e) => setNewRepoUrl(e.target.value)}
+                  className="w-full bg-slate-950/60 border border-indigo-950/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-400">GitHub Installation ID (Opsional)</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: 12345678"
+                  value={newInstallationId}
+                  onChange={(e) => setNewInstallationId(e.target.value)}
+                  className="w-full bg-slate-950/60 border border-indigo-950/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 text-xs px-4 py-2 rounded-lg transition-colors cursor-pointer font-medium"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                >
+                  Simpan Proyek
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
