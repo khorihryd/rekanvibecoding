@@ -9,7 +9,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | Fase | Deskripsi Fase | Total Task | Selesai | Progres (%) |
 |---|---|---|---|---|
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
-| **Fase 1** | Auth & Struktur Database | 5 | 2 | 40% |
+| **Fase 1** | Auth & Struktur Database | 5 | 3 | 60% |
 | **Fase 2** | Integrasi GitHub | 4 | 0 | 0% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
@@ -50,7 +50,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Tanggal:** 2026-07-21
 - **Ringkasan:** Menginstal `@sentry/nextjs`, mengonfigurasi SDK untuk client, server, dan edge, serta menambahkan endpoint test `/api/test-sentry` untuk memicu exception secara sengaja dan menangkapnya di Sentry.
 - **File berubah:** `package.json`, `package-lock.json`, `next.config.ts`, `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `src/app/api/test-sentry/route.ts`.
-- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` and menggunakan native system font stack.
+- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` dan menggunakan native system font stack.
 
 ---
 
@@ -71,10 +71,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** RLS diatur sehingga pengguna hanya dapat berinteraksi dengan data proyek milik mereka sendiri (`auth.uid() = user_id`).
 
 #### Task 1.3 — Tabel `decisions`
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Menulis SQL migration script untuk tabel `decisions` dengan foreign key reference ke projects dan self-reference (superseded_by), serta mengonfigurasi RLS policies berbasis kepemilikan proyek. Membuat endpoint `/api/test-decisions` untuk verifikasi konektivitas.
+- **File berubah:** `supabase/migrations/20260721091700_create_decisions.sql`, `src/app/api/test-decisions/route.ts`.
+- **Catatan:** RLS policy memverifikasi kepemilikan proyek pengguna via `EXISTS` check pada tabel `projects` (`projects.user_id = auth.uid()`).
+
+#### Task 1.4 — Tabel `tasks`
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat file migrasi SQL untuk tabel `decisions` di Supabase, mengaktifkan RLS policies (hanya pemilik proyek yang bisa mengakses keputusan terkait), dan menulis petunjuk pengujian manual.
+- **Rencana Tindakan:** Membuat file migrasi SQL untuk tabel `tasks` di Supabase, mengaktifkan RLS policies (hanya pemilik proyek yang bisa mengakses task terkait), dan membuat API route `/api/test-tasks` untuk pengujian koneksi.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 1 — Task 1.3: Tabel `decisions`**
+- **Fase 1 — Task 1.4: Tabel `tasks`**
