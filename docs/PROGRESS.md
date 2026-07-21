@@ -9,7 +9,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | Fase | Deskripsi Fase | Total Task | Selesai | Progres (%) |
 |---|---|---|---|---|
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
-| **Fase 1** | Auth & Struktur Database | 5 | 4 | 80% |
+| **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 0 | 0% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
@@ -85,10 +85,13 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** RLS policy memverifikasi kepemilikan proyek pengguna via `EXISTS` check pada tabel `projects` (`projects.user_id = auth.uid()`).
 
 #### Task 1.5 — Tabel `project_state`
-- **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat file migrasi SQL untuk tabel `project_state` di Supabase, mengaktifkan RLS policies (hanya pemilik proyek yang bisa mengakses state terkait), mengonfigurasi trigger database untuk otomatis membuat row awal `project_state` kosong ketika proyek baru dibuat, dan membuat API route `/api/test-project-state` untuk pengujian koneksi.
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Menulis SQL migration script untuk tabel `project_state`, mengaktifkan RLS policies berbasis kepemilikan proyek, dan membuat function serta trigger database `on_project_created` di PostgreSQL untuk otomatis membuat state awal proyek bermutu markdown saat baris proyek baru ditambahkan. Membuat endpoint `/api/test-project-state` untuk verifikasi konektivitas.
+- **File berubah:** `supabase/migrations/20260721092400_create_project_state.sql`, `src/app/api/test-project-state/route.ts`.
+- **Catatan:** Skema relasi data diatur 1-to-1 (`project_id UNIQUE`).
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 1 — Task 1.5: Tabel `project_state`**
+- **Fase 2 — Task 2.1: Koneksi GitHub OAuth/App**
