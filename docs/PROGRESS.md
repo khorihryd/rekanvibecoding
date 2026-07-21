@@ -8,7 +8,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 
 | Fase | Deskripsi Fase | Total Task | Selesai | Progres (%) |
 |---|---|---|---|---|
-| **Fase 0** | Fondasi Project | 4 | 3 | 75% |
+| **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 0 | 0% |
 | **Fase 2** | Integrasi GitHub | 4 | 0 | 0% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
@@ -43,13 +43,16 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Tanggal:** 2026-07-21
 - **Ringkasan:** Menginstal `@supabase/supabase-js`, mengonfigurasi client di `src/lib/supabase.ts`, menyediakan berkas template `.env.example`, dan membuat API route `/api/test-supabase` untuk pengujian koneksi.
 - **File berubah:** `package.json`, `package-lock.json`, `.env.example`, `src/lib/supabase.ts`, `src/app/api/test-supabase/route.ts`.
-- **Catatan:** Koneksi diuji dengan mencoba handshake PostgREST/PostgreSQL, menangani kode status error PG 42P01 (relation not found) sebagai indikasi handshake sukses.
+- **Catatan:** Handshake berhasil divalidasi ke database nyata dengan credential `.env.local` milik user.
 
 #### Task 0.4 — Setup Sentry dasar
-- **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Menginstal Sentry SDK untuk Next.js (`@sentry/nextjs`), melakukan inisialisasi konfigurasi dasar Sentry di proyek Next.js, dan memvalidasi penangkapan exception uji coba via route `/api/test-sentry`.
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Menginstal `@sentry/nextjs`, mengonfigurasi SDK untuk client, server, dan edge, serta menambahkan endpoint test `/api/test-sentry` untuk memicu exception secara sengaja dan menangkapnya di Sentry.
+- **File berubah:** `package.json`, `package-lock.json`, `next.config.ts`, `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `src/app/api/test-sentry/route.ts`.
+- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` dan menggunakan native system font stack.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 0 — Task 0.4: Setup Sentry dasar**
+- **Fase 1 — Task 1.1: Auth dasar (signup/login)**
