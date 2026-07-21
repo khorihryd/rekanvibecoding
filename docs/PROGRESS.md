@@ -9,7 +9,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | Fase | Deskripsi Fase | Total Task | Selesai | Progres (%) |
 |---|---|---|---|---|
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
-| **Fase 1** | Auth & Struktur Database | 5 | 3 | 60% |
+| **Fase 1** | Auth & Struktur Database | 5 | 4 | 80% |
 | **Fase 2** | Integrasi GitHub | 4 | 0 | 0% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
@@ -78,10 +78,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** RLS policy memverifikasi kepemilikan proyek pengguna via `EXISTS` check pada tabel `projects` (`projects.user_id = auth.uid()`).
 
 #### Task 1.4 — Tabel `tasks`
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Menulis SQL migration script untuk tabel `tasks` (dengan check constraint status enum) dan project-scoped RLS policies. Membuat endpoint `/api/test-tasks` untuk verifikasi konektivitas.
+- **File berubah:** `supabase/migrations/20260721092200_create_tasks.sql`, `src/app/api/test-tasks/route.ts`.
+- **Catatan:** RLS policy memverifikasi kepemilikan proyek pengguna via `EXISTS` check pada tabel `projects` (`projects.user_id = auth.uid()`).
+
+#### Task 1.5 — Tabel `project_state`
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat file migrasi SQL untuk tabel `tasks` di Supabase, mengaktifkan RLS policies (hanya pemilik proyek yang bisa mengakses task terkait), dan membuat API route `/api/test-tasks` untuk pengujian koneksi.
+- **Rencana Tindakan:** Membuat file migrasi SQL untuk tabel `project_state` di Supabase, mengaktifkan RLS policies (hanya pemilik proyek yang bisa mengakses state terkait), mengonfigurasi trigger database untuk otomatis membuat row awal `project_state` kosong ketika proyek baru dibuat, dan membuat API route `/api/test-project-state` untuk pengujian koneksi.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 1 — Task 1.4: Tabel `tasks`**
+- **Fase 1 — Task 1.5: Tabel `project_state`**
