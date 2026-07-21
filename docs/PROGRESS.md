@@ -11,7 +11,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
-| **Fase 3** | Otak CSA (AI Layer) | 6 | 2 | 33% |
+| **Fase 3** | Otak CSA (AI Layer) | 6 | 3 | 50% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
@@ -142,10 +142,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** System prompt memuat aturan ketat penolakan kode (seperti RLS bypass dan minim penanganan error database).
 
 #### Task 3.3 — Endpoint brainstorming keputusan arsitektur
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Membuat API route `/api/csa/brainstorm` yang menyematkan status arsitektur proyek terbaru dari tabel `project_state` ke LLM query. Memperbarui dashboard UI chat input agar langsung memanggil endpoint ini. Menambahkan tombol "Simpan Keputusan" di UI Chat untuk menyimpan langsung analisis CSA ke tabel `decisions` database Supabase, dan mengaktifkan automasi seeding keputusan awal saat proyek baru dibuat.
+- **File berubah:** `src/app/api/csa/brainstorm/route.ts`, `src/app/dashboard/page.tsx`.
+- **Catatan:** Integrasi decisions terhubung langsung ke state rendering database di dashboard.
+
+#### Task 3.4 — Endpoint dekomposisi task
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat API endpoint POST `/api/csa/brainstorm` yang menerima usulan desain arsitektur pengguna, menyuapkannya ke helper AI menggunakan `CSA_DECISION_PROMPT`, dan mengembalikan evaluasi terstruktur dari CSA. Mengintegrasikan endpoint ini pada panel obrolan (chat) utama dashboard.
+- **Rencana Tindakan:** Membuat API route POST `/api/csa/generate-task` yang mengompilasi seluruh keputusan arsitektur aktif dan context proyek saat ini, meminta LLM mendekomposisi kebutuhan fitur pengguna menjadi berkas spesifikasi markdown `NEXT_TASK_PROMPT.md` dan struktur task baru di tabel `tasks`.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 3 — Task 3.3: Endpoint brainstorming keputusan arsitektur**
+- **Fase 3 — Task 3.4: Endpoint dekomposisi task**

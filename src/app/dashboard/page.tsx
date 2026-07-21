@@ -225,6 +225,57 @@ export default function Home() {
     }
   };
 
+  const fetchDecisions = async () => {
+    if (!activeProject) return;
+    try {
+      const { data, error } = await supabase
+        .from('decisions')
+        .select('*')
+        .eq('project_id', activeProject.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDecisions(data || []);
+    } catch (err) {
+      console.error('Error fetching decisions:', err);
+    }
+  };
+
+  const handleSaveDecision = async (text: string) => {
+    if (!activeProject) {
+      alert('Pilih proyek terlebih dahulu.');
+      return;
+    }
+
+    const decisionTitle = window.prompt('Masukkan judul singkat keputusan arsitektur ini:', 'Keputusan Desain Arsitektural');
+    if (!decisionTitle) return;
+
+    try {
+      const { error } = await supabase
+        .from('decisions')
+        .insert([
+          {
+            project_id: activeProject.id,
+            decision_text: decisionTitle,
+            reasoning: text
+          }
+        ]);
+
+      if (error) throw error;
+
+      setLogs(prev => [...prev, `[System] Keputusan "${decisionTitle}" berhasil disimpan ke database.`]);
+      
+      setNotifications(prev => [
+        ...prev,
+        { id: Date.now().toString(), text: `Keputusan disimpan: ${decisionTitle}`, type: 'success' }
+      ]);
+
+      await fetchDecisions();
+    } catch (err: any) {
+      alert('Gagal menyimpan keputusan: ' + err.message);
+    }
+  };
+
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProjectName.trim() || !user) return;
@@ -274,6 +325,26 @@ export default function Home() {
       
       await fetchProjects();
       if (data && data.length > 0) {
+        // Seed default decisions
+        try {
+          await supabase
+            .from('decisions')
+            .insert([
+              {
+                project_id: data[0].id,
+                decision_text: 'Menggunakan Next.js 16 App Router dengan TypeScript',
+                reasoning: 'Mendukung React 19 Server Components untuk performa optimal dan rendering terstruktur.'
+              },
+              {
+                project_id: data[0].id,
+                decision_text: 'Menggunakan Supabase untuk Auth, DB PostgreSQL, dan RLS',
+                reasoning: 'Memangkas waktu setup backend dan menjamin keamanan multi-user lewat RLS bawaan.'
+              }
+            ]);
+        } catch (seedErr) {
+          console.error('Failed to seed default decisions:', seedErr);
+        }
+
         setActiveProject(data[0]);
         setGithubRepo(data[0].github_repo_url || '');
       }
@@ -288,6 +359,13 @@ export default function Home() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  useEffect(() => {
+    if (activeProject) {
+      fetchDecisions();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProject]);
 
   // Mock Database State (in-memory, loaded from/to localStorage)
   const [decisions, setDecisions] = useState<Decision[]>([]);
@@ -509,7 +587,7 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
   }, [messages, isTyping]);
 
   // Handle User Input in Chat
-  const handleChatSubmit = (e: React.FormEvent) => {
+  const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
 
@@ -524,64 +602,43 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
     setChatInput('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/csa/brainstorm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: userMsg.text,
+          projectId: activeProject?.id || null,
+          model: selectedModel
+        })
+      });
+      const data = await res.json();
       setIsTyping(false);
-      
-      let replyText = '';
-      let newDecs: Array<{ text: string; reasoning: string }> = [];
-      let newTsk: Array<{ title: string; spec: string }> = [];
 
-      const query = userMsg.text.toLowerCase();
-      if (query.includes('sentry') || query.includes('error')) {
-        replyText = 'Saya mendeteksi keinginan untuk melacak error sistem. Saya menyarankan menambahkan integrasi Sentry dasar (Fase 0.4).\n\nKeputusan Arsitektur:\n- Tambahkan Sentry SDK di Next.js.\n\nSaya telah menambahkan keputusan ini ke Database dan membuat Task 0.4 di list draf.';
-        newDecs = [{
-          text: 'Setup Sentry dasar untuk pemantauan error real-time',
-          reasoning: 'Menjamin error krusial di client-side maupun API route tertangkap langsung sebelum merugikan user.'
-        }];
-        newTsk = [{
-          title: 'Setup Sentry Dasar (Fase 0.4)',
-          spec: 'Install @sentry/nextjs, jalankan setup wizard, dan uji throw error di page `/test-error`.'
-        }];
-
-        // Add to state DB
-        const newDecision: Decision = {
-          id: `dec-${Date.now()}`,
-          project_id: 'rekanvibecoding',
-          decision_text: newDecs[0].text,
-          reasoning: newDecs[0].reasoning,
-          created_at: new Date().toISOString()
-        };
-        const newTask: Task = {
-          id: `task-${Date.now()}`,
-          project_id: 'rekanvibecoding',
-          title: newTsk[0].title,
-          spec_markdown: newTsk[0].spec,
-          status: 'draft',
-          branch_name: 'feature/sentry-integration',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        saveDb([...decisions, newDecision], [...tasks, newTask]);
-        setNotifications(prev => [
-          ...prev, 
-          { id: Date.now().toString(), text: `Keputusan baru ditambahkan: ${newDecs[0].text}`, type: 'success' }
-        ]);
-      } else if (query.includes('deploy') || query.includes('hosting') || query.includes('vercel')) {
-        replyText = 'Untuk deployment, kita mengandalkan Vercel yang tersambung ke repositori GitHub. Setiap push ke branch main akan memicu auto-deploy.\n\nApakah Anda sudah membuat project di Vercel? Saya menyarankan melakukan deploy pertama sebelum menambahkan fitur yang lebih kompleks agar kita memiliki environment staging yang bersih.';
+      if (data.success) {
+        setMessages(prev => [...prev, {
+          id: `msg-c-${Date.now()}`,
+          sender: 'csa',
+          text: data.text,
+          timestamp: new Date()
+        }]);
       } else {
-        replyText = `Pertanyaan bagus! Sebagai CSA, saya merekomendasikan kita tetap fokus menyelesaikan Task aktif saat ini: **"Implementasi Review Otomatis CSA (Fase 5.4)"**. \n\nKetika task tersebut selesai dan di-merge, kita bisa melanjutkan brainstorming untuk fitur-fitur baru lainnya. Apakah Anda ingin saya menjelaskan cara menguji task aktif saat ini lewat panel simulator di sebelah kanan?`;
+        setMessages(prev => [...prev, {
+          id: `msg-c-${Date.now()}`,
+          sender: 'csa',
+          text: `Gagal mendapatkan analisis dari CSA: ${data.error}`,
+          timestamp: new Date()
+        }]);
       }
-
+    } catch (err: any) {
+      setIsTyping(false);
       setMessages(prev => [...prev, {
         id: `msg-c-${Date.now()}`,
         sender: 'csa',
-        text: replyText,
-        timestamp: new Date(),
-        decisionsGenerated: newDecs.length > 0 ? newDecs : undefined,
-        tasksGenerated: newTsk.length > 0 ? newTsk : undefined
+        text: `Error menghubungi CSA Engine: ${err.message || err}`,
+        timestamp: new Date()
       }]);
-    }, 1500);
+    }
   };
 
   // Run Simulator Workflow Steps
@@ -1112,6 +1169,18 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
                       <div className="space-y-2">
                         <div className={`rounded-xl p-3.5 text-sm leading-relaxed ${msg.sender === 'user' ? 'bg-indigo-600 text-white' : 'bg-[#0f1322] border border-indigo-950/50 text-slate-200'}`}>
                           <p className="whitespace-pre-wrap">{msg.text}</p>
+
+                          {msg.sender === 'csa' && (
+                            <div className="mt-3 flex justify-end">
+                              <button
+                                onClick={() => handleSaveDecision(msg.text)}
+                                className="text-[10px] bg-indigo-600/10 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/20 px-2 py-1 rounded transition-colors cursor-pointer flex items-center gap-1 font-semibold"
+                              >
+                                <Database size={10} />
+                                <span>Simpan Keputusan</span>
+                              </button>
+                            </div>
+                          )}
                           
                           {/* Decisions generated visualization */}
                           {msg.decisionsGenerated && (
