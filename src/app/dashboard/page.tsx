@@ -245,6 +245,27 @@ export default function Home() {
       if (error) throw error;
 
       setIsCreateModalOpen(false);
+      
+      // Register GitHub webhook if repo url is provided
+      if (newRepoUrl) {
+        try {
+          const webhookRes = await fetch('/api/github/register-webhook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.id, repoUrl: newRepoUrl })
+          });
+          const webhookData = await webhookRes.json();
+          if (webhookData.success) {
+            setLogs(prev => [...prev, `[System] ${webhookData.message}`]);
+          } else {
+            setLogs(prev => [...prev, `[System] Gagal daftar webhook: ${webhookData.error}`]);
+          }
+        } catch (webhookErr: any) {
+          console.error('Error calling register webhook endpoint:', webhookErr);
+          setLogs(prev => [...prev, `[System] Gagal daftar webhook: ${webhookErr.message || webhookErr}`]);
+        }
+      }
+
       setNewProjectName('');
       setNewRepoUrl('');
       setNewInstallationId('');

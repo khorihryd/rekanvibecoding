@@ -10,7 +10,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 |---|---|---|---|---|
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
-| **Fase 2** | Integrasi GitHub | 4 | 2 | 50% |
+| **Fase 2** | Integrasi GitHub | 4 | 3 | 75% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
@@ -110,10 +110,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Endpoint ini mendukung request POST untuk webhook aktual dan GET untuk pemeriksaan liveness sederhana.
 
 #### Task 2.3 — Registrasi webhook ke GitHub API
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Menginstal library `octokit`. Membuat API route `/api/github/register-webhook` untuk mendaftarkan URL webhook aplikasi Next.js ke repositori GitHub target menggunakan Octokit. Mengintegrasikannya ke fungsi pembuatan proyek baru `handleCreateProject` di dashboard agar webhook otomatis terdaftar saat proyek dibuat.
+- **File berubah:** `package.json`, `package-lock.json`, `src/app/api/github/register-webhook/route.ts`, `src/app/dashboard/page.tsx`.
+- **Catatan:** Menyediakan fallback mockup aman jika credentials belum siap untuk dev offline.
+
+#### Task 2.4 — Ambil isi file dari repo
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat utility server-side (misalnya memanfaatkan API routes atau trigger proyek baru) untuk mendaftarkan URL webhook aplikasi Next.js ke repositori GitHub yang dipilih menggunakan client Octokit (atau merekamnya sebagai mockup jika sedang berjalan di mode mockup).
+- **Rencana Tindakan:** Membuat API route GET `/api/github/read-file` yang menerima parameter `userId`, `repoUrl`, dan `path` (file path) untuk membaca konten file di GitHub menggunakan client Octokit (atau mengembalikan mockup jika berjalan di mode dev mockup).
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 2 — Task 2.3: Registrasi webhook ke GitHub API**
+- **Fase 2 — Task 2.4: Ambil isi file dari repo**
