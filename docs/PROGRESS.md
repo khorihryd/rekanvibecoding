@@ -10,7 +10,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 |---|---|---|---|---|
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
-| **Fase 2** | Integrasi GitHub | 4 | 0 | 0% |
+| **Fase 2** | Integrasi GitHub | 4 | 1 | 25% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
@@ -87,11 +87,26 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 1.5 — Tabel `project_state`
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menulis SQL migration script untuk tabel `project_state`, mengaktifkan RLS policies berbasis kepemilikan proyek, dan membuat function serta trigger database `on_project_created` di PostgreSQL untuk otomatis membuat state awal proyek bermutu markdown saat baris proyek baru ditambahkan. Membuat endpoint `/api/test-project-state` untuk verifikasi konektivitas.
+- **Ringkasan:** Menulis SQL migration script untuk tabel `project_state`, mengaktifkan RLS policies berbasis kepemilikan proyek, dan membuat function serta trigger database `on_project_created` di PostgreSQL untuk otomatis membuat state awal proyek bermutu markdown saat baris proyek baru didambahkan. Membuat endpoint `/api/test-project-state` untuk verifikasi konektivitas.
 - **File berubah:** `supabase/migrations/20260721092400_create_project_state.sql`, `src/app/api/test-project-state/route.ts`.
 - **Catatan:** Skema relasi data diatur 1-to-1 (`project_id UNIQUE`).
 
 ---
 
+### Fase 2 — Integrasi GitHub
+
+#### Task 2.1 — Koneksi GitHub OAuth/App
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` dan callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya ke dropdown pilihan repositori di modal pembuatan proyek baru.
+- **File berubah:** `supabase/migrations/20260721094400_create_github_tokens.sql`, `src/lib/supabaseServer.ts`, `src/app/api/auth/github/login/route.ts`, `src/app/api/auth/github/callback/route.ts`, `src/app/api/github/repos/route.ts`, `src/app/dashboard/page.tsx`, `.env.example`.
+- **Catatan:** Fallback mockup otomatis digunakan apabila client credentials belum siap di `.env.local` untuk mempermudah development lokal.
+
+#### Task 2.2 — Setup webhook GitHub
+- **Status:** Belum Selesai (Task Berikutnya)
+- **Rencana Tindakan:** Membuat API endpoint POST `/api/webhook/github` untuk menerima webhook payload dari event push GitHub. Menampilkan log atau mencatat aktivitas push ke dalam dashboard simulator.
+
+---
+
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 2 — Task 2.1: Koneksi GitHub OAuth/App**
+- **Fase 2 — Task 2.2: Setup webhook GitHub**

@@ -145,6 +145,50 @@ export default function Home() {
   const [newRepoUrl, setNewRepoUrl] = useState('');
   const [newInstallationId, setNewInstallationId] = useState('');
 
+  // GitHub Repos & Connection State
+  const [githubRepos, setGithubRepos] = useState<any[]>([]);
+  const [isGithubConnected, setIsGithubConnected] = useState(false);
+  const [fetchingRepos, setFetchingRepos] = useState(false);
+  const [selectedRepoFullName, setSelectedRepoFullName] = useState('');
+
+  const fetchGithubRepos = async () => {
+    if (!user) return;
+    try {
+      setFetchingRepos(true);
+      const res = await fetch(`/api/github/repos?userId=${user.id}`);
+      const data = await res.json();
+      setGithubRepos(data.repos || []);
+      setIsGithubConnected(data.connected || false);
+    } catch (err) {
+      console.error('Error fetching github repos:', err);
+    } finally {
+      setFetchingRepos(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isCreateModalOpen && user) {
+      fetchGithubRepos();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCreateModalOpen, user]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const githubStatus = params.get('github');
+      const githubError = params.get('github_error');
+
+      if (githubStatus === 'connected') {
+        setLogs(prev => [...prev, '[System] Akun GitHub berhasil dihubungkan!']);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (githubError) {
+        setLogs(prev => [...prev, `[System] Gagal menghubungkan ke GitHub: ${decodeURIComponent(githubError)}`]);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
+
   const fetchProjects = async () => {
     if (!user) return;
     try {
@@ -1783,7 +1827,51 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400">GitHub Repository URL</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-semibold text-slate-400">GitHub Repository</label>
+                  {!isGithubConnected ? (
+                    <a
+                      href={`/api/auth/github/login?userId=${user?.id}`}
+                      className="text-[10px] text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      <GithubIcon size={10} /> Hubungkan GitHub
+                    </a>
+                  ) : (
+                    <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                      ● Terhubung ke GitHub
+                    </span>
+                  )}
+                </div>
+                
+                <select
+                  value={selectedRepoFullName}
+                  onChange={(e) => {
+                    setSelectedRepoFullName(e.target.value);
+                    const selected = githubRepos.find(r => r.full_name === e.target.value);
+                    if (selected) {
+                      setNewRepoUrl(selected.html_url);
+                      if (!newProjectName.trim()) {
+                        setNewProjectName(selected.name);
+                      }
+                    }
+                  }}
+                  className="w-full bg-slate-950/60 border border-indigo-950/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                >
+                  <option value="">-- Pilih Repositori --</option>
+                  {fetchingRepos ? (
+                    <option value="">Memuat...</option>
+                  ) : (
+                    githubRepos.map(repo => (
+                      <option key={repo.id} value={repo.full_name}>
+                        {repo.full_name} {repo.isMock ? '(Mockup)' : ''}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-400">Repository URL (Manual)</label>
                 <input
                   type="url"
                   placeholder="https://github.com/username/repo"
