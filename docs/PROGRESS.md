@@ -9,7 +9,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | Fase | Deskripsi Fase | Total Task | Selesai | Progres (%) |
 |---|---|---|---|---|
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
-| **Fase 1** | Auth & Struktur Database | 5 | 0 | 0% |
+| **Fase 1** | Auth & Struktur Database | 5 | 1 | 20% |
 | **Fase 2** | Integrasi GitHub | 4 | 0 | 0% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
@@ -54,5 +54,20 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 
 ---
 
+### Fase 1 — Auth & Struktur Database
+
+#### Task 1.1 — Auth dasar (signup/login)
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Membuat form login & pendaftaran di `/login` dengan visualisasi premium, mengamankan rute dashboard `/dashboard` dengan redirect otomatis client-side, dan memperbarui sidebar profile dengan email dan tombol logout.
+- **File berubah:** `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/dashboard/page.tsx`.
+- **Catatan:** Menggunakan client-side session routing.
+
+#### Task 1.2 — Tabel `projects`
+- **Status:** Belum Selesai (Task Berikutnya)
+- **Rencana Tindakan:** Membuat query SQL untuk skema tabel `projects` di dashboard Supabase (termasuk RLS policies), membuat form pembuatan proyek baru di aplikasi, dan menyimpan data proyek terhubung langsung ke Supabase DB.
+
+---
+
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 1 — Task 1.1: Auth dasar (signup/login)**
+- **Fase 1 — Task 1.2: Tabel `projects`**
