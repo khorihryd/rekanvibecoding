@@ -11,7 +11,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
-| **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
+| **Fase 3** | Otak CSA (AI Layer) | 6 | 1 | 16% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
@@ -128,11 +128,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 ### Fase 3 — Otak CSA (AI Layer)
 
 #### Task 3.1 — Setup engine LLM & API client
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Menginstal library inti Vercel AI SDK `ai` beserta provider `@ai-sdk/google` dan `@ai-sdk/openai`. Menyusun helper function `generateTextContent` di `src/lib/ai.ts` untuk memfasilitasi pemanggilan LLM dinamis dengan parameter temperature & system prompt, lengkap dengan mode mockup fallback jika API keys belum tersedia di `.env.local`. Membuat route test `/api/test-ai` untuk verifikasi.
+- **File berubah:** `package.json`, `package-lock.json`, `src/lib/ai.ts`, `src/app/api/test-ai/route.ts`, `.env.example`.
+- **Catatan:** Mode mockup otomatis menghasilkan dokumen arsitektur dan spesifikasi tugas berkualitas tinggi untuk meniru output AI yang sesungguhnya.
+
+#### Task 3.2 — Definisikan system prompt CSA
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Mengintegrasikan model LLM (menggunakan SDK API atau Vercel AI SDK), mengonfigurasi variabel lingkungan untuk API key terkait, dan membuat helper function server-side untuk memanggil model dengan parameter & system prompt tertentu.
-- **File berubah:** `.env.example` (atau template terkait).
+- **Rencana Tindakan:** Menyusun berkas konfigurasi system prompt utama untuk agen CSA (misalnya di `src/lib/csa/prompts.ts` atau file markdown terdedikasi) untuk mendikte perilaku agen AI asisten arsitek agar bertindak tegas, analitis, dan taat aturan arsitektur.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 3 — Task 3.1: Setup engine LLM & API client**
+- **Fase 3 — Task 3.2: Definisikan system prompt CSA**
