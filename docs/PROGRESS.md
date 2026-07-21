@@ -11,7 +11,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
-| **Fase 3** | Otak CSA (AI Layer) | 6 | 1 | 16% |
+| **Fase 3** | Otak CSA (AI Layer) | 6 | 2 | 33% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
@@ -135,10 +135,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Mode mockup otomatis menghasilkan dokumen arsitektur dan spesifikasi tugas berkualitas tinggi untuk meniru output AI yang sesungguhnya.
 
 #### Task 3.2 — Definisikan system prompt CSA
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Menyusun konstanta system prompt modular untuk CSA di `src/lib/csa/prompts.ts`, mencakup identitas dasar, evaluasi keputusan arsitektur (brainstorming), pembuat spesifikasi tugas (task generator), serta verifikasi kepatuhan kode (git diff auditor).
+- **File berubah:** `src/lib/csa/prompts.ts`.
+- **Catatan:** System prompt memuat aturan ketat penolakan kode (seperti RLS bypass dan minim penanganan error database).
+
+#### Task 3.3 — Endpoint brainstorming keputusan arsitektur
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Menyusun berkas konfigurasi system prompt utama untuk agen CSA (misalnya di `src/lib/csa/prompts.ts` atau file markdown terdedikasi) untuk mendikte perilaku agen AI asisten arsitek agar bertindak tegas, analitis, dan taat aturan arsitektur.
+- **Rencana Tindakan:** Membuat API endpoint POST `/api/csa/brainstorm` yang menerima usulan desain arsitektur pengguna, menyuapkannya ke helper AI menggunakan `CSA_DECISION_PROMPT`, dan mengembalikan evaluasi terstruktur dari CSA. Mengintegrasikan endpoint ini pada panel obrolan (chat) utama dashboard.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 3 — Task 3.2: Definisikan system prompt CSA**
+- **Fase 3 — Task 3.3: Endpoint brainstorming keputusan arsitektur**
