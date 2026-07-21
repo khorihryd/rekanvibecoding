@@ -10,7 +10,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 |---|---|---|---|---|
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
-| **Fase 2** | Integrasi GitHub | 4 | 1 | 25% |
+| **Fase 2** | Integrasi GitHub | 4 | 2 | 50% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
@@ -103,10 +103,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Fallback mockup otomatis digunakan apabila client credentials belum siap di `.env.local` untuk mempermudah development lokal.
 
 #### Task 2.2 — Setup webhook GitHub
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Membuat route API webhook `/api/webhook/github` untuk menerima HTTP POST push events dari GitHub. Mengurai informasi dasar seperti nama repositori, branch pembawa perubahan, nama pusher, serta rincian pesan commit yang masuk ke log console/server.
+- **File berubah:** `src/app/api/webhook/github/route.ts`.
+- **Catatan:** Endpoint ini mendukung request POST untuk webhook aktual dan GET untuk pemeriksaan liveness sederhana.
+
+#### Task 2.3 — Registrasi webhook ke GitHub API
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat API endpoint POST `/api/webhook/github` untuk menerima webhook payload dari event push GitHub. Menampilkan log atau mencatat aktivitas push ke dalam dashboard simulator.
+- **Rencana Tindakan:** Membuat utility server-side (misalnya memanfaatkan API routes atau trigger proyek baru) untuk mendaftarkan URL webhook aplikasi Next.js ke repositori GitHub yang dipilih menggunakan client Octokit (atau merekamnya sebagai mockup jika sedang berjalan di mode mockup).
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 2 — Task 2.2: Setup webhook GitHub**
+- **Fase 2 — Task 2.3: Registrasi webhook ke GitHub API**
