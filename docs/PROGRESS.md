@@ -10,7 +10,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 |---|---|---|---|---|
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
-| **Fase 2** | Integrasi GitHub | 4 | 3 | 75% |
+| **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 0 | 0% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
@@ -117,10 +117,22 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Menyediakan fallback mockup aman jika credentials belum siap untuk dev offline.
 
 #### Task 2.4 — Ambil isi file dari repo
+- **Status:** Selesai
+- **Tanggal:** 2026-07-21
+- **Ringkasan:** Membuat API route GET `/api/github/read-file` untuk mengambil konten berkas spesifik dari GitHub. Menguraikan URL repository, mengambil token akses, menggunakan `octokit.rest.repos.getContent` untuk request file, serta mendekode kontennya dari format base64.
+- **File berubah:** `src/app/api/github/read-file/route.ts`.
+- **Catatan:** Menyediakan visualisasi fallback file penting arsitektur seperti `csa-sync/context.md`, `AGENTS.md`, dan `README.md` dalam mode mockup dev offline.
+
+---
+
+### Fase 3 — Otak CSA (AI Layer)
+
+#### Task 3.1 — Setup engine LLM & API client
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat API route GET `/api/github/read-file` yang menerima parameter `userId`, `repoUrl`, dan `path` (file path) untuk membaca konten file di GitHub menggunakan client Octokit (atau mengembalikan mockup jika berjalan di mode dev mockup).
+- **Rencana Tindakan:** Mengintegrasikan model LLM (menggunakan SDK API atau Vercel AI SDK), mengonfigurasi variabel lingkungan untuk API key terkait, dan membuat helper function server-side untuk memanggil model dengan parameter & system prompt tertentu.
+- **File berubah:** `.env.example` (atau template terkait).
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 2 — Task 2.4: Ambil isi file dari repo**
+- **Fase 3 — Task 3.1: Setup engine LLM & API client**
