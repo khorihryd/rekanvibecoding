@@ -463,10 +463,54 @@ export default function Home() {
   }, [user]);
 
   useEffect(() => {
-    if (activeProject) {
-      fetchDecisions();
-      fetchTasks();
-    }
+    if (!activeProject) return;
+
+    fetchDecisions();
+    fetchTasks();
+
+    // Setup Supabase realtime subscriptions for both tasks and decisions tables
+    const tasksChannel = supabase
+      .channel('tasks-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tasks'
+        },
+        (payload: any) => {
+          console.log('[Realtime] Task change detected:', payload);
+          if ((payload.new && payload.new.project_id === activeProject.id) || 
+              (payload.old && payload.old.project_id === activeProject.id)) {
+            fetchTasks();
+          }
+        }
+      )
+      .subscribe();
+
+    const decisionsChannel = supabase
+      .channel('decisions-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'decisions'
+        },
+        (payload: any) => {
+          console.log('[Realtime] Decision change detected:', payload);
+          if ((payload.new && payload.new.project_id === activeProject.id) || 
+              (payload.old && payload.old.project_id === activeProject.id)) {
+            fetchDecisions();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(tasksChannel);
+      supabase.removeChannel(decisionsChannel);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProject]);
 

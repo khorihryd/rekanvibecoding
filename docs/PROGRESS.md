@@ -14,7 +14,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
-| **Fase 6** | Dashboard & Status Tracking | 4 | 1 | 25% |
+| **Fase 6** | Dashboard & Status Tracking | 4 | 2 | 50% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
 
@@ -98,7 +98,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 2.1 — Koneksi GitHub OAuth/App
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` dan callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya ke dropdown pilihan repositori di modal pembuatan proyek baru.
+- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` dan callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya to dropdown pilihan repositori di modal pembuatan proyek baru.
 - **File berubah:** `supabase/migrations/20260721094400_create_github_tokens.sql`, `src/lib/supabaseServer.ts`, `src/app/api/auth/github/login/route.ts`, `src/app/api/auth/github/callback/route.ts`, `src/app/api/github/repos/route.ts`, `src/app/dashboard/page.tsx`, `.env.example`.
 - **Catatan:** Fallback mockup otomatis digunakan apabila client credentials belum siap di `.env.local` untuk mempermudah development lokal.
 
@@ -176,7 +176,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 4.1 — Sync spesifikasi task ke repository
 - **Status:** Selesai
 - **Tanggal:** 2026-07-22
-- **Ringkasan:** Membuat API route `/api/github/sync-task` yang menggunakan Octokit untuk memverifikasi/membuat branch `feature/task-{id}` dan meng-commit berkas markdown spesifikasi tugas `csa-sync/inbox/task-{id}.md`. Menghubungkan fungsi `handleGenerateTask` di dashboard agar otomatis melakukan trigger sinkronisasi ini.
+- **Ringkasan:** Membuat API route `/api/github/sync-task` yang menggunakan Octokit untuk memverifikasi/membuat branch `feature/task-{id}` and meng-commit berkas markdown spesifikasi tugas `csa-sync/inbox/task-{id}.md`. Menghubungkan fungsi `handleGenerateTask` di dashboard agar otomatis melakukan trigger sinkronisasi ini.
 - **File berubah:** `src/app/api/github/sync-task/route.ts`, `src/app/dashboard/page.tsx`.
 - **Catatan:** Mendukung mock commit virtual jika token OAuth pengguna belum siap secara lokal.
 
@@ -266,10 +266,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Desain Kanban Board disesuaikan agar rapi dan responsif pada layar monitor lebar.
 
 #### Task 6.2 — Sinkronisasi status Kanban realtime
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Memasang listener realtime Supabase channel (`postgres_changes`) untuk tabel `tasks` dan `decisions` di hook `activeProject` dashboard. Listener memantau operasi INSERT, UPDATE, dan DELETE di database dan otomatis memicu re-fetch state secara reaktif/realtime di client side.
+- **File berubah:** `src/app/dashboard/page.tsx`.
+- **Catatan:** Menjamin perubahan status dari background worker/webhook langsung memperbarui kolom kartu Kanban secara instan.
+
+#### Task 6.3 — Integrasi visual spec PRD & BRD
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Menambahkan Supabase realtime subscription pada tabel `tasks` (atau routine re-fetch periodik) agar status Kanban terupdate secara langsung (reaktif) di layar pengguna begitu status database berubah.
+- **Rencana Tindakan:** Memperbarui tab Specifications di dashboard agar menampilkan berkas spesifikasi PRD & BRD dinamis yang dimuat langsung dari tabel `project_state` database Supabase (`context_markdown`) alih-alih menggunakan teks hardcoded.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 6 — Task 6.2: Sinkronisasi status Kanban realtime**
+- **Fase 6 — Task 6.3: Integrasi visual spec PRD & BRD**
