@@ -14,7 +14,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
-| **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
+| **Fase 6** | Dashboard & Status Tracking | 4 | 1 | 25% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
 
@@ -98,7 +98,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 2.1 — Koneksi GitHub OAuth/App
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` dan callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya to dropdown pilihan repositori di modal pembuatan proyek baru.
+- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` dan callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya ke dropdown pilihan repositori di modal pembuatan proyek baru.
 - **File berubah:** `supabase/migrations/20260721094400_create_github_tokens.sql`, `src/lib/supabaseServer.ts`, `src/app/api/auth/github/login/route.ts`, `src/app/api/auth/github/callback/route.ts`, `src/app/api/github/repos/route.ts`, `src/app/dashboard/page.tsx`, `.env.example`.
 - **Catatan:** Fallback mockup otomatis digunakan apabila client credentials belum siap di `.env.local` untuk mempermudah development lokal.
 
@@ -259,10 +259,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 ### Fase 6 — Dashboard & Status Tracking
 
 #### Task 6.1 — Tampilan daftar task dinamis
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Memperluas tipe interface Task status untuk mendukung status `rejected` secara penuh di TypeScript. Merestrukturisasi layout Kanban Board menjadi grid 6-kolom terpisah yang dinamis (Inbox, In Progress, Awaiting Review, Approved, Rejected, Merged) di mana masing-masing kolom memfilter dan menampilkan data kartu secara realtime dari database Supabase.
+- **File berubah:** `src/app/dashboard/page.tsx`.
+- **Catatan:** Desain Kanban Board disesuaikan agar rapi dan responsif pada layar monitor lebar.
+
+#### Task 6.2 — Sinkronisasi status Kanban realtime
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Memastikan rendering Kanban Board (kolom Inbox, In Progress, Awaiting Review, Approved, Rejected, Merged) terisi penuh dari database Supabase (`tasks` table) dan merespon perubahan status secara reaktif.
+- **Rencana Tindakan:** Menambahkan Supabase realtime subscription pada tabel `tasks` (atau routine re-fetch periodik) agar status Kanban terupdate secara langsung (reaktif) di layar pengguna begitu status database berubah.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 6 — Task 6.1: Tampilan daftar task dinamis**
+- **Fase 6 — Task 6.2: Sinkronisasi status Kanban realtime**

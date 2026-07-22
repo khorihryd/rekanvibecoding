@@ -34,7 +34,8 @@ import {
   Terminal,
   Activity,
   FileEdit,
-  History
+  History,
+  X
 } from 'lucide-react';
 
 const GithubIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
@@ -79,7 +80,7 @@ interface Task {
   project_id: string;
   title: string;
   spec_markdown: string;
-  status: 'draft' | 'inbox' | 'in_progress' | 'awaiting_review' | 'revision' | 'approved' | 'merged';
+  status: 'draft' | 'inbox' | 'in_progress' | 'awaiting_review' | 'revision' | 'approved' | 'rejected' | 'merged';
   branch_name: string;
   created_at: string;
   updated_at: string;
@@ -1562,64 +1563,28 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
                 </div>
 
                 {/* Kanban Columns */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
                   
-                  {/* Draft Column */}
-                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-3 flex flex-col min-h-[300px]">
-                    <div className="flex justify-between items-center pb-2.5 border-b border-indigo-950/40 mb-3">
-                      <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                        Draft Spec
-                      </span>
-                      <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold font-mono">
-                        {tasks.filter(t => t.status === 'draft').length}
-                      </span>
-                    </div>
-                    <div className="space-y-2 flex-1">
-                      {tasks.filter(t => t.status === 'draft').map(t => (
-                        <div key={t.id} className="bg-[#0f1322] border border-indigo-950/60 p-3 rounded-lg text-xs space-y-2">
-                          <h4 className="font-semibold text-slate-200">{t.title}</h4>
-                          <p className="text-slate-400 leading-normal line-clamp-3">{t.spec_markdown}</p>
-                          <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1 border-t border-indigo-950/30">
-                            <span className="font-mono">{t.id}</span>
-                            <span>Draft</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Sync/Inbox Column */}
-                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-3 flex flex-col min-h-[300px]">
-                    <div className="flex justify-between items-center pb-2.5 border-b border-indigo-950/40 mb-3">
-                      <span className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                  {/* Column 1: Inbox */}
+                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-2.5 flex flex-col min-h-[300px]">
+                    <div className="flex justify-between items-center pb-2 border-b border-indigo-950/40 mb-2.5">
+                      <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                        Inbox (Repo)
+                        Inbox
                       </span>
-                      <span className="text-[10px] bg-indigo-950/60 text-indigo-300 border border-indigo-500/20 px-1.5 py-0.5 rounded font-bold font-mono">
-                        {tasks.filter(t => t.status === 'inbox' || t.status === 'in_progress').length}
+                      <span className="text-[9px] bg-indigo-950/60 text-indigo-300 border border-indigo-500/20 px-1 py-0.5 rounded font-bold font-mono">
+                        {tasks.filter(t => t.status === 'inbox' || t.status === 'draft').length}
                       </span>
                     </div>
-                    <div className="space-y-2 flex-1">
-                      {tasks.filter(t => t.status === 'inbox' || t.status === 'in_progress').map(t => (
-                        <div key={t.id} className="bg-[#0f1322] border border-blue-900/30 p-3 rounded-lg text-xs space-y-2 relative overflow-hidden">
-                          {t.status === 'in_progress' && (
-                            <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 animate-pulse" />
-                          )}
-                          <div className="flex justify-between items-start">
-                            <h4 className="font-semibold text-slate-200">{t.title}</h4>
-                          </div>
-                          <p className="text-slate-400 leading-normal line-clamp-3">{t.spec_markdown}</p>
-                          <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1 border-t border-indigo-950/30">
+                    <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
+                      {tasks.filter(t => t.status === 'inbox' || t.status === 'draft').map(t => (
+                        <div key={t.id} className="bg-[#0f1322] border border-blue-900/20 p-2.5 rounded-lg text-[11px] space-y-1.5 relative overflow-hidden">
+                          <h4 className="font-semibold text-slate-200 line-clamp-1">{t.title}</h4>
+                          <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
+                          <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
                             <span className="font-mono">{t.id}</span>
-                            <span className="font-mono text-blue-400 flex items-center gap-1">
-                              {t.status === 'in_progress' ? (
-                                <>
-                                  <RefreshCw size={10} className="animate-spin" /> Working
-                                </>
-                              ) : (
-                                'csa-sync/inbox'
-                              )}
+                            <span className={`font-mono px-1 py-0.2 rounded text-[8px] font-bold uppercase ${t.status === 'draft' ? 'bg-slate-900 text-slate-400' : 'bg-blue-950/50 text-blue-300'}`}>
+                              {t.status === 'draft' ? 'draft' : 'inbox'}
                             </span>
                           </div>
                         </div>
@@ -1627,33 +1592,86 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
                     </div>
                   </div>
 
-                  {/* Awaiting Review Column */}
-                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-3 flex flex-col min-h-[300px]">
-                    <div className="flex justify-between items-center pb-2.5 border-b border-indigo-950/40 mb-3">
-                      <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                        Verification
+                  {/* Column 2: In Progress */}
+                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-2.5 flex flex-col min-h-[300px]">
+                    <div className="flex justify-between items-center pb-2 border-b border-indigo-950/40 mb-2.5">
+                      <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                        In Progress
                       </span>
-                      <span className="text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 px-1.5 py-0.5 rounded font-bold font-mono">
-                        {tasks.filter(t => t.status === 'awaiting_review' || t.status === 'approved' || t.status === 'revision').length}
+                      <span className="text-[9px] bg-sky-950/40 text-sky-300 border border-sky-500/20 px-1 py-0.5 rounded font-bold font-mono">
+                        {tasks.filter(t => t.status === 'in_progress').length}
                       </span>
                     </div>
-                    <div className="space-y-2 flex-1">
-                      {tasks.filter(t => t.status === 'awaiting_review' || t.status === 'approved' || t.status === 'revision').map(t => (
+                    <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
+                      {tasks.filter(t => t.status === 'in_progress').map(t => (
+                        <div key={t.id} className="bg-[#0f1322] border border-sky-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5 relative overflow-hidden">
+                          <div className="absolute top-0 left-0 right-0 h-0.5 bg-sky-500 animate-pulse" />
+                          <h4 className="font-semibold text-slate-200 line-clamp-1">{t.title}</h4>
+                          <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
+                          <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
+                            <span className="font-mono">{t.id}</span>
+                            <span className="font-mono text-sky-400 flex items-center gap-0.5">
+                              <RefreshCw size={9} className="animate-spin" /> Coding
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Column 3: Awaiting Review */}
+                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-2.5 flex flex-col min-h-[300px]">
+                    <div className="flex justify-between items-center pb-2 border-b border-indigo-950/40 mb-2.5">
+                      <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        Awaiting Review
+                      </span>
+                      <span className="text-[9px] bg-amber-500/10 text-amber-300 border border-amber-500/20 px-1 py-0.5 rounded font-bold font-mono">
+                        {tasks.filter(t => t.status === 'awaiting_review').length}
+                      </span>
+                    </div>
+                    <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
+                      {tasks.filter(t => t.status === 'awaiting_review').map(t => (
                         <div 
-                          key={t.id} 
+                          key={t.id}
                           onClick={() => setActiveTab('verify')}
-                          className="bg-[#0f1322] border border-amber-900/30 p-3 rounded-lg text-xs space-y-2 hover:border-amber-500/40 transition-all cursor-pointer group"
+                          className="bg-[#0f1322] border border-amber-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5 hover:border-amber-500/40 transition-all cursor-pointer group"
                         >
                           <h4 className="font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors flex items-center justify-between">
-                            <span>{t.title}</span>
-                            <ChevronRight size={12} className="text-slate-500 group-hover:text-indigo-400" />
+                            <span className="line-clamp-1">{t.title}</span>
+                            <ChevronRight size={10} className="text-slate-500 group-hover:text-indigo-400 flex-shrink-0" />
                           </h4>
-                          <p className="text-slate-400 leading-normal line-clamp-3">{t.spec_markdown}</p>
-                          <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1 border-t border-indigo-950/30">
+                          <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
+                          <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
                             <span className="font-mono">{t.id}</span>
-                            <span className={`font-semibold font-mono ${t.status === 'approved' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                              {t.status === 'approved' ? 'CSA Technical Passed' : 'Awaiting Review'}
+                            <span className="font-mono text-amber-400 font-medium">Verify</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Column 4: Approved */}
+                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-2.5 flex flex-col min-h-[300px]">
+                    <div className="flex justify-between items-center pb-2 border-b border-indigo-950/40 mb-2.5">
+                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        Approved
+                      </span>
+                      <span className="text-[9px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-1 py-0.5 rounded font-bold font-mono">
+                        {tasks.filter(t => t.status === 'approved').length}
+                      </span>
+                    </div>
+                    <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
+                      {tasks.filter(t => t.status === 'approved').map(t => (
+                        <div key={t.id} className="bg-[#0f1322] border border-emerald-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5">
+                          <h4 className="font-semibold text-slate-200 line-clamp-1">{t.title}</h4>
+                          <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
+                          <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
+                            <span className="font-mono">{t.id}</span>
+                            <span className="text-emerald-400 font-mono font-medium flex items-center gap-0.5">
+                              <Check size={9} /> approved
                             </span>
                           </div>
                         </div>
@@ -1661,25 +1679,52 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
                     </div>
                   </div>
 
-                  {/* Merged Column */}
-                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-3 flex flex-col min-h-[300px]">
-                    <div className="flex justify-between items-center pb-2.5 border-b border-indigo-950/40 mb-3">
-                      <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                        Merged to Main
+                  {/* Column 5: Rejected */}
+                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-2.5 flex flex-col min-h-[300px]">
+                    <div className="flex justify-between items-center pb-2 border-b border-indigo-950/40 mb-2.5">
+                      <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                        Rejected
                       </span>
-                      <span className="text-[10px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-1.5 py-0.5 rounded font-bold font-mono">
+                      <span className="text-[9px] bg-rose-500/10 text-rose-300 border border-rose-500/20 px-1 py-0.5 rounded font-bold font-mono">
+                        {tasks.filter(t => t.status === 'rejected').length}
+                      </span>
+                    </div>
+                    <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
+                      {tasks.filter(t => t.status === 'rejected').map(t => (
+                        <div key={t.id} className="bg-[#0f1322] border border-rose-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5">
+                          <h4 className="font-semibold text-slate-200 line-clamp-1">{t.title}</h4>
+                          <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
+                          <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
+                            <span className="font-mono">{t.id}</span>
+                            <span className="text-rose-400 font-mono font-medium flex items-center gap-0.5">
+                              <X size={9} /> rejected
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Column 6: Merged */}
+                  <div className="bg-[#0b0f19]/30 border border-indigo-950/30 rounded-xl p-2.5 flex flex-col min-h-[300px]">
+                    <div className="flex justify-between items-center pb-2 border-b border-indigo-950/40 mb-2.5">
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                        Merged
+                      </span>
+                      <span className="text-[9px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-1 py-0.5 rounded font-bold font-mono">
                         {tasks.filter(t => t.status === 'merged').length}
                       </span>
                     </div>
-                    <div className="space-y-2 flex-1 overflow-y-auto max-h-[350px]">
+                    <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
                       {tasks.filter(t => t.status === 'merged').map(t => (
-                        <div key={t.id} className="bg-[#0f1322]/50 border border-emerald-950/50 p-3 rounded-lg text-xs space-y-2 opacity-75">
+                        <div key={t.id} className="bg-[#0f1322]/50 border border-indigo-950/20 p-2.5 rounded-lg text-[11px] space-y-1.5 opacity-75">
                           <h4 className="font-semibold text-slate-300 line-clamp-1">{t.title}</h4>
-                          <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1 border-t border-indigo-950/20 font-mono">
+                          <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/20 font-mono">
                             <span>{t.id}</span>
-                            <span className="text-emerald-500 flex items-center gap-0.5">
-                              <CheckCircle2 size={10} /> merged
+                            <span className="text-indigo-400 flex items-center gap-0.5 font-medium">
+                              <CheckCircle2 size={9} /> merged
                             </span>
                           </div>
                         </div>
