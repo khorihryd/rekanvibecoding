@@ -11,7 +11,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
-| **Fase 3** | Otak CSA (AI Layer) | 6 | 4 | 66% |
+| **Fase 3** | Otak CSA (AI Layer) | 6 | 5 | 83% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
@@ -112,7 +112,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 2.3 — Registrasi webhook ke GitHub API
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menginstal library `octokit`. Membuat API route `/api/github/register-webhook` untuk mendaftarkan URL webhook aplikasi Next.js ke repositori GitHub target menggunakan Octokit. Mengintegrasikannya ke fungsi pembuatan proyek baru `handleCreateProject` di dashboard agar webhook otomatis terdaftar saat proyek dibuat.
+- **Ringkasan:** Menginstal library `octokit`. Membuat API route `/api/github/register-webhook` untuk mendaftarkan URL webhook aplikasi Next.js ke repositori GitHub target menggunakan Octokit. Mengintegrasikannya to fungsi pembuatan proyek baru `handleCreateProject` di dashboard agar webhook otomatis terdaftar saat proyek dibuat.
 - **File berubah:** `package.json`, `package-lock.json`, `src/app/api/github/register-webhook/route.ts`, `src/app/dashboard/page.tsx`.
 - **Catatan:** Menyediakan fallback mockup aman jika credentials belum siap untuk dev offline.
 
@@ -156,10 +156,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** RLS ditaati penuh. Generasi task menyertakan progress bar spinner di modal.
 
 #### Task 3.5 — Endpoint evaluasi perbedaan kode (diff evaluator)
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat API route `/api/csa/evaluate-diff` untuk mengevaluasi perubahan kode (git diff) berdasarkan spesifikasi tugas tertentu menggunakan `CSA_VERIFICATION_PROMPT` LLM. Output dibatasi dalam format terstruktur JSON (approved, score, reasoning, feedback).
+- **File berubah:** `src/app/api/csa/evaluate-diff/route.ts`.
+- **Catatan:** Menyertakan ulasan mockup cerdas jika berjalan dalam offline dev mode untuk memeriksa keberadaan filter Sentry, try-catch, dan deteksi RLS bypass.
+
+#### Task 3.6 — Endpoint update status arsitektur (context updater)
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat API route POST `/api/csa/evaluate-diff` yang menerima spesifikasi tugas (task spec) dan code diff, mengulasnya dengan LLM menggunakan `CSA_VERIFICATION_PROMPT`, dan mengembalikan JSON terstruktur berisi status persetujuan, nilai skor, dan feedback perbaikan rinci.
+- **Rencana Tindakan:** Membuat API route POST `/api/csa/update-context` yang menerima diff task yang baru saja disetujui untuk dimerge, memprosesnya dengan LLM untuk merumuskan update ringkasan arsitektur proyek terbaru, lalu merevisi kolom `context_markdown` di tabel `project_state` database Supabase.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 3 — Task 3.5: Endpoint evaluasi perbedaan kode (diff evaluator)**
+- **Fase 3 — Task 3.6: Endpoint update status arsitektur (context updater)**
