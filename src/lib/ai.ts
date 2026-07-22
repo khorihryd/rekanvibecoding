@@ -86,7 +86,7 @@ Ini adalah respon simulasi dalam mode offline. Untuk mengaktifkan respon AI sung
       aiModel = openai(model);
     } else {
       // Default to Google Gemini if not OpenAI or specifically Gemini
-      aiModel = google(model === 'gemini-3.5-flash' ? 'gemini-1.5-flash' : model);
+      aiModel = google(model === 'gemini-3.5-flash' ? 'gemini-2.5-flash' : model);
     }
 
     const response = await generateText({
