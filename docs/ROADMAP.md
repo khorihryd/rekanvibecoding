@@ -217,6 +217,36 @@
 
 ---
 
+## Fase 7.5 — Mode Self-Hosted vs Hosted & Sistem Token
+
+**Tujuan fase:** Mendukung monetisasi platform melalui kuota token (mode Hosted) dan opsi bring-your-own-key (mode Self-Hosted) untuk fleksibilitas pengguna.
+
+### Task 7.5.1 — Skema Database & Model Token
+- Buat skema tabel `tokens` dan kolom pencatatan kuota transaksi pemakaian API LLM per proyek/user.
+- **Selesai jika:** tabel kuota terbuat di Supabase, RLS aktif, dan relasi data token/pemakaian terverifikasi.
+
+### Task 7.5.2 — Konfigurasi Mode Self-Hosted (API Key User)
+- Bangun UI form input API Key LLM personal (OpenAI / Gemini) pada dashboard pengaturan proyek dan simpan secara terenkripsi.
+- **Selesai jika:** API key dapat disimpan oleh pengguna dan divalidasi keaktifannya.
+
+### Task 7.5.3 — Konfigurasi Mode Hosted (Sistem Token Admin)
+- Implementasikan pemotongan saldo token pengguna saat menggunakan endpoint AI bawaan dari platform CSA.
+- **Selesai jika:** transaksi kredit token terpotong otomatis setiap kali memicu request AI hosted.
+
+### Task 7.5.4 — Middleware Pembatasan Akses & Token Check
+- Buat middleware verifikasi sisa kuota token atau ketersediaan personal API key sebelum mengizinkan request API routes arsitektur.
+- **Selesai jika:** request diblokir otomatis dengan kode error 402/403 saat token habis dan personal API key kosong.
+
+### Task 7.5.5 — UI Dashboard Saldo & Token Usage
+- Tambahkan card visual untuk memantau status pemakaian token, riwayat transaksi kuota, serta toggle switch/mode deployment.
+- **Selesai jika:** widget menampilkan data saldo riil pengguna dari database secara reaktif.
+
+### Task 7.5.6 — Switcher Mode Deployment & Uji Validasi
+- Sediakan switcher global di dashboard untuk mengubah status proyek dari mode hosted ke self-hosted beserta pengujian E2E kedua mode.
+- **Selesai jika:** transisi mode mengubah target endpoint AI dan skema pemotongan token/personal key secara instan tanpa downtime.
+
+---
+
 ## Fase 8 — Hardening & Monitoring
 
 **Tujuan fase:** Persiapan sebelum dipakai untuk project nyata (dogfooding).

@@ -16,6 +16,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 4 | 100% |
 | **Fase 7** | Audit Gate & Merge | 4 | 4 | 100% |
+| **Fase 7.5** | Mode Self-Hosted vs Hosted & Sistem Token | 6 | 0 | 0% |
 | **Fase 8** | Hardening & Monitoring | 4 | 4 | 100% |
 
 ---
@@ -317,6 +318,35 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Ringkasan:** Menyisipkan validasi format baris per baris Environment Variables (KEY=VALUE) sebelum merge dijalankan. Environment variables berhasil divalidasi dan disimpan di localStorage di bawah namespace project dan task ID yang aman setelah task diubah statusnya menjadi merged di database.
 - **File berubah:** `src/app/dashboard/page.tsx`.
 
+
+---
+
+### Fase 7.5 — Mode Self-Hosted vs Hosted & Sistem Token
+
+#### Task 7.5.1 — Skema Database & Model Token
+- **Status:** Belum Dikerjakan
+- **Rencana Tindakan:** Membuat migrasi SQL untuk tabel `tokens` dan mengaktifkan kebijakan RLS terkait kuota transaksi.
+
+#### Task 7.5.2 — Konfigurasi Mode Self-Hosted (API Key User)
+- **Status:** Belum Dikerjakan
+- **Rencana Tindakan:** Membangun form input API key personal pada dashboard pengaturan proyek.
+
+#### Task 7.5.3 — Konfigurasi Mode Hosted (Sistem Token Admin)
+- **Status:** Belum Dikerjakan
+- **Rencana Tindakan:** Menambahkan fungsi pemotongan kredit token di database untuk transaksi API AI bawaan.
+
+#### Task 7.5.4 — Middleware Pembatasan Akses & Token Check
+- **Status:** Belum Dikerjakan
+- **Rencana Tindakan:** Mengimplementasikan kontrol akses API berdasarkan kuota token dan status key.
+
+#### Task 7.5.5 — UI Dashboard Saldo & Token Usage
+- **Status:** Belum Dikerjakan
+- **Rencana Tindakan:** Mendesain widget saldo token visual reaktif pada antarmuka utama dashboard.
+
+#### Task 7.5.6 — Switcher Mode Deployment & Uji Validasi
+- **Status:** Belum Dikerjakan
+- **Rencana Tindakan:** Membuat switcher global untuk mengubah status mode proyek dan menguji integrasi E2E.
+
 ---
 
 ### Fase 8 — Hardening & Monitoring
@@ -385,5 +415,14 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 
 ---
 
+### Koreksi 4 — Sinkronkan Dokumen Repo dengan Versi Terbaru
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Memperbarui berkas `docs/ROADMAP.md` dengan menyisipkan detail pengerjaan Fase 7.5 (Mode Self-Hosted vs Hosted & Sistem Token, Tasks 7.5.1 - 7.5.6) dan berkas `docs/BRD.md` dengan menyertakan detail model bisnis & sistem monetisasi (Section 3.1). Menambahkan log pendaftaran task-task baru tersebut ke dalam `docs/PROGRESS.md` dengan status `Belum Dikerjakan`.
+- **File berubah:** `docs/ROADMAP.md`, `docs/BRD.md`, `docs/PROGRESS.md`
+- **Catatan untuk manusia:** Ini mensinkronkan dokumentasi proyek ke status versi terbaru sesuai kesepakatan revisi bisnis dan arsitektur token.
+
+---
+
 ## Task Berikutnya yang Akan Dikerjakan
-- **Koreksi 4 — Sinkronkan Dokumen Repo dengan Versi Terbaru**
+- **Fase 7.5 — Task 7.5.1: Skema Database & Model Token (Belum Dikerjakan)**

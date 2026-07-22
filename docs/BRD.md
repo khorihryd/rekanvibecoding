@@ -25,9 +25,14 @@ Semakin banyak individu non-teknis membangun produk software lewat AI ("vibe cod
 - Model AI fleksibel (tidak terkunci ke satu provider)
 
 ### Di luar scope MVP:
-- Model bisnis/monetisasi (fase ini murni validasi produk)
 - Dukungan multi-project atau tim (multi-user dalam satu project)
 - Integrasi native dengan tool AI tertentu (Cursor API, Codex API, dll) — pendekatan awal tetap file-based/generic
+
+### 3.1 Model Bisnis & Sistem Monetisasi (Revisi Fase 7.5)
+
+Untuk mendukung keberlanjutan produk, aplikasi CSA menerapkan dual-mode pengoperasian:
+1. **Mode Hosted (SaaS):** Pengguna menggunakan API key LLM & infrastruktur server yang disediakan oleh CSA. Penggunaan ini dikenakan biaya berbasis **Sistem Token** (kredit pemakaian) yang dikurangi setiap kali melakukan brainstorming, dekomposisi task, atau audit kode otomatis.
+2. **Mode Self-Hosted (Bring Your Own Key):** Pengguna dapat memasukkan API Key LLM mereka sendiri (OpenAI, Google Gemini, dll) pada pengaturan proyek. Pada mode ini, pemakaian token di-bypass (gratis untuk akses server CSA), dan pengguna membayar biaya langganan bulanan (*subscription*) dasar yang lebih murah untuk penggunaan platform saja.
 
 ## 4. Pemangku Kepentingan (Stakeholders)
 
