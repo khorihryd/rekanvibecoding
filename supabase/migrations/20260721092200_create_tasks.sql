@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS public.tasks (
     project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     spec_markdown TEXT NOT NULL,
-    status TEXT NOT NULL CHECK (status IN ('draft', 'inbox', 'in_progress', 'awaiting_review', 'revision', 'approved', 'merged')),
+    status TEXT NOT NULL CHECK (status IN ('draft', 'inbox', 'in_progress', 'awaiting_review', 'revision', 'approved', 'rejected', 'merged')),
     branch_name TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL

@@ -16,7 +16,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 4 | 100% |
 | **Fase 7** | Audit Gate & Merge | 4 | 4 | 100% |
-| **Fase 8** | Hardening & Monitoring | 4 | 2 | 50% |
+| **Fase 8** | Hardening & Monitoring | 4 | 3 | 75% |
 
 ---
 
@@ -197,7 +197,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 4.4 — Pull code perubahan dari repository
 - **Status:** Selesai
 - **Tanggal:** 2026-07-22
-- **Ringkasan:** Membuat API route `/api/github/pull-changes` yang menggunakan `octokit.request` dengan header accept `vnd.github.v3.diff` untuk mengambil data diff teks mentah antara branch task dengan branch default (main/master).
+- **Ringkasan:** Membuat API route GET `/api/github/pull-changes` untuk mengambil data diff teks mentah antara branch task dengan branch default (main/master).
 - **File berubah:** `src/app/api/github/pull-changes/route.ts`.
 - **Catatan:** Menyediakan mockup diff terstruktur yang bermutu (seperti penambahan package sentry dan try-catch error checks) jika berjalan dalam mode offline development.
 
@@ -334,10 +334,16 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **File berubah:** `src/app/dashboard/page.tsx`, `src/app/api/csa/brainstorm/route.ts`.
 
 #### Task 8.3 — Review keamanan RLS & credential
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Melakukan audit RLS di semua tabel (`projects`, `decisions`, `tasks`, `project_state`, `github_tokens`) untuk memastikan data user terisolasi dengan aman. Menambahkan status `'rejected'` ke CHECK constraint pada tabel `tasks` di file SQL migrasi untuk mencegah database violation crash saat verifikasi ditolak. Laporan audit didokumentasikan di [rls_security_audit.md](file:///home/khori/.gemini/antigravity-cli/brain/9c7796a5-1b66-400b-9849-00ca3baa2bb1/rls_security_audit.md).
+- **File berubah:** `supabase/migrations/20260721092200_create_tasks.sql`.
+
+#### Task 8.4 — Uji end-to-end satu project nyata
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Melakukan review menyeluruh terhadap konfigurasi database RLS untuk tabel `projects`, `decisions`, `tasks`, dan `project_state` guna memastikan data user terisolasi penuh dan aman dari kebocoran credential GitHub.
+- **Rencana Tindakan:** Melakukan pengujian end-to-end lengkap dari inisiasi project, brainstorm keputusan, pembuatan task, simulasi git push & webhook status update, verifikasi audit oleh CSA, input secrets, hingga merge dan context update.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 8 — Task 8.3: Review keamanan RLS & credential**
+- **Fase 8 — Task 8.4: Uji end-to-end satu project nyata**
