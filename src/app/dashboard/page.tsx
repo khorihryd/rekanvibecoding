@@ -339,6 +339,20 @@ export default function Home() {
             const syncData = await syncRes.json();
             if (syncData.success) {
               setLogs(prev => [...prev, `[GitHub Sync] ${syncData.message}`]);
+              
+              // Update task status from Draft to Inbox in the database
+              try {
+                const { error: statusError } = await supabase
+                  .from('tasks')
+                  .update({ status: 'inbox', updated_at: new Date().toISOString() })
+                  .eq('id', data.task.id);
+
+                if (statusError) throw statusError;
+                setLogs(prev => [...prev, `[System] Status task "${data.task.title}" berhasil diperbarui ke Inbox.`]);
+              } catch (statusErr: any) {
+                console.error('Error updating task status:', statusErr);
+                setLogs(prev => [...prev, `[System] Gagal memperbarui status task ke Inbox: ${statusErr.message || statusErr}`]);
+              }
             } else {
               setLogs(prev => [...prev, `[GitHub Sync] Gagal menyinkronkan: ${syncData.error}`]);
             }

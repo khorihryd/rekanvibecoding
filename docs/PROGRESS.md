@@ -12,7 +12,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
-| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 1 | 20% |
+| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 2 | 40% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
@@ -130,7 +130,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 3.1 — Setup engine LLM & API client
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menginstal library inti Vercel AI SDK `ai` beserta provider `@ai-sdk/google` dan `@ai-sdk/openai`. Menyusun helper function `generateTextContent` di `src/lib/ai.ts` untuk memfasilitasi pemanggilan LLM dinamis dengan parameter temperature & system prompt, lengkap dengan mode mockup fallback jika API keys belum tersedia di `.env.local`. Membuat route test `/api/test-ai` untuk verifikasi.
+- **Ringkasan:** Menginstal library inti Vercel AI SDK `ai` beserta provider `@ai-sdk/google` dan `@ai-sdk/openai`. Menyusun helper function `generateTextContent` di `src/lib/ai.ts` untuk memfasilitasi pemanggilan LLM dinamis dengan parameter temperature & system prompt, lengkap dengan mode mockup fallback jika API keys belum tersedia di `.env.local` untuk mempermudah development lokal. Membuat route test `/api/test-ai` untuk verifikasi.
 - **File berubah:** `package.json`, `package-lock.json`, `src/lib/ai.ts`, `src/app/api/test-ai/route.ts`, `.env.example`.
 - **Catatan:** Mode mockup otomatis menghasilkan dokumen arsitektur dan spesifikasi tugas berkualitas tinggi untuk meniru output AI yang sesungguhnya.
 
@@ -181,10 +181,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Mendukung mock commit virtual jika token OAuth pengguna belum siap secara lokal.
 
 #### Task 4.2 — Update status task (Draft ke Inbox)
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Menyisipkan query database `supabase.from('tasks').update({ status: 'inbox' })` pada client-side dashboard pasca pemanggilan `/api/github/sync-task` mengembalikan status sukses. Hal ini memastikan status task berubah menjadi `inbox` di DB dan Kanban secara otomatis.
+- **File berubah:** `src/app/dashboard/page.tsx`.
+- **Catatan:** Transisi status divalidasi dan berjalan mulus dalam workflow pembuatan task.
+
+#### Task 4.3 — Deteksi trigger webhook ke status In Progress
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Memperbarui backend flow pembuat task atau dashboard UI sehingga saat API sync-task sukses dijalankan, status task di tabel `tasks` database Supabase otomatis di-update dari `draft` menjadi `inbox`.
+- **Rencana Tindakan:** Memodifikasi GitHub webhook receiver di `src/app/api/webhook/github/route.ts` agar memeriksa branch yang di-push. Jika branch tersebut cocok dengan format branch task (`feature/task-{id}` atau padanannya), ubah status baris task yang bersangkutan di Supabase `tasks` dari `inbox` menjadi `in_progress`.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 4 — Task 4.2: Update status task (Draft ke Inbox)**
+- **Fase 4 — Task 4.3: Deteksi trigger webhook ke status In Progress**
