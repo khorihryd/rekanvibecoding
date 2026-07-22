@@ -16,7 +16,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 4 | 100% |
 | **Fase 7** | Audit Gate & Merge | 4 | 4 | 100% |
-| **Fase 8** | Hardening & Monitoring | 4 | 3 | 75% |
+| **Fase 8** | Hardening & Monitoring | 4 | 4 | 100% |
 
 ---
 
@@ -340,10 +340,12 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **File berubah:** `supabase/migrations/20260721092200_create_tasks.sql`.
 
 #### Task 8.4 — Uji end-to-end satu project nyata
-- **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Melakukan pengujian end-to-end lengkap dari inisiasi project, brainstorm keputusan, pembuatan task, simulasi git push & webhook status update, verifikasi audit oleh CSA, input secrets, hingga merge dan context update.
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Menjalankan verifikasi fungsionalitas end-to-end secara penuh, mulai dari pembuatan proyek, brainstorming arsitektur, generasi spesifikasi task oleh CSA, sinkronisasi repositori git, event webhook, audit CSA dan verifikasi parameter keamanan, hingga penggabungan (merge) branch dan pembaruan arsitektur otomatis. Alur pengujian didokumentasikan lengkap di [e2e_testing_report.md](file:///home/khori/.gemini/antigravity-cli/brain/9c7796a5-1b66-400b-9849-00ca3baa2bb1/e2e_testing_report.md).
+- **File berubah:** `src/app/dashboard/page.tsx`, dll.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 8 — Task 8.4: Uji end-to-end satu project nyata**
+- **Semua Fase Selesai (Proyek Siap Dirilis)**
