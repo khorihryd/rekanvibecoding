@@ -16,7 +16,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 4 | 100% |
 | **Fase 7** | Audit Gate & Merge | 4 | 4 | 100% |
-| **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
+| **Fase 8** | Hardening & Monitoring | 4 | 1 | 25% |
 
 ---
 
@@ -204,7 +204,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 4.5 — Update status task (In Progress ke Awaiting Review)
 - **Status:** Selesai
 - **Tanggal:** 2026-07-22
-- **Ringkasan:** Menyisipkan logika trigger `/api/github/pull-changes` dan update status database ke `awaiting_review` pada dashboard simulator `triggerCiTests` saat uji CI/CD berhasil lolos. Status task berhasil berpindah dari `in_progress` ke `awaiting_review` di database Supabase dan memindahkan visual kartu di Kanban Board.
+- **Ringkasan:** Menyisipkan logika trigger `/api/github/pull-changes` and update status database ke `awaiting_review` pada dashboard simulator `triggerCiTests` saat uji CI/CD berhasil lolos. Status task berhasil berpindah dari `in_progress` ke `awaiting_review` di database Supabase dan memindahkan visual kartu di Kanban Board.
 - **File berubah:** `src/app/dashboard/page.tsx`.
 - **Catatan:** Alur integrasi teruji lengkap.
 
@@ -231,7 +231,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Tanggal:** 2026-07-22
 - **Ringkasan:** Menyisipkan layer **Static Audit Pre-check** programmatik di `/api/csa/verify-task` sebelum LLM dihubungi. Pre-check ini mendeteksi bypass RLS Supabase (kunci `service_role`) atau ketiadaan try-catch/Sentry pada file typescript logika secara statis dan menolaknya langsung dengan status approved: false dan skor rendah.
 - **File berubah:** `src/app/api/csa/verify-task/route.ts`.
-- **Catatan:** Pengujian statis berjalan aman di baris kode server, memperkuat keamanan sebelum LLM dievalasi.
+- **Catatan:** Pengujian statis berjalan aman di baris kode server, memperkuat keamanan sebelum LLM dievaluasi.
 
 #### Task 5.4 — Laporan audit kualitas kode otomatis
 - **Status:** Selesai
@@ -319,5 +319,19 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 
 ---
 
+### Fase 8 — Hardening & Monitoring
+
+#### Task 8.1 — Error handling menyeluruh
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Melakukan audit menyeluruh terhadap semua API routes, server actions, dan fungsi client-side di dashboard. Memastikan keberadaan try-catch blocks di setiap handler, integrasi callback error-handling, serta validasi status HTTP response (termasuk fallback mockup aman jika service key atau token GitHub tidak terdefinisi).
+- **File berubah:** `src/app/dashboard/page.tsx`, `src/app/api/csa/verify-task/route.ts`, dll.
+
+#### Task 8.2 — Rate limiting & validasi input
+- **Status:** Belum Selesai (Task Berikutnya)
+- **Rencana Tindakan:** Mengimplementasikan validasi input di form pembuatan proyek (panjang nama minimal, validasi format URL repository) dan memverifikasi batas rate-limiting sederhana untuk mencegah penyalahgunaan API endpoint AI.
+
+---
+
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 8 — Task 8.1: Error handling menyeluruh**
+- **Fase 8 — Task 8.2: Rate limiting & validasi input**
