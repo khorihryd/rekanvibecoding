@@ -12,7 +12,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
-| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 4 | 80% |
+| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
@@ -202,10 +202,22 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Menyediakan mockup diff terstruktur yang bermutu (seperti penambahan package sentry dan try-catch error checks) jika berjalan dalam mode offline development.
 
 #### Task 4.5 — Update status task (In Progress ke Awaiting Review)
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Menyisipkan logika trigger `/api/github/pull-changes` dan update status database ke `awaiting_review` pada dashboard simulator `triggerCiTests` saat uji CI/CD berhasil lolos. Status task berhasil berpindah dari `in_progress` ke `awaiting_review` di database Supabase dan memindahkan visual kartu di Kanban Board.
+- **File berubah:** `src/app/dashboard/page.tsx`.
+- **Catatan:** Alur integrasi teruji lengkap.
+
+---
+
+### Fase 5 — Mesin Verifikasi
+
+#### Task 5.1 — Baca spec task dari DB & diff kode
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Memperbarui alur verifikasi kode pada dashboard simulator di mana setelah diff kode ditarik sukses, status task di tabel `tasks` database Supabase otomatis di-update dari `in_progress` ke `awaiting_review`.
+- **Rencana Tindakan:** Membuat kerangka verifikator server-side atau controller pendukung di mana asisten arsitek membaca isi spesifikasi teknis (`spec_markdown`) dan teks perbedaan kode (`diff_text`) dari database untuk siap diumpankan ke API mesin evaluator CSA.
+- **File berubah:** (Akan dikerjakan)
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 4 — Task 4.5: Update status task (In Progress ke Awaiting Review)**
+- **Fase 5 — Task 5.1: Baca spec task dari DB & diff kode**

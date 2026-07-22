@@ -836,6 +836,49 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
         if (shouldPass) {
           setSimStep('ci_passed');
           setLogs(prev => [...prev, `[GitHub Actions] CI/CD Tests Lolos (Semua test berhasil)`]);
+
+          // Pull changes from repository and update status to awaiting_review
+          const targetTask = tasks.find(t => t.status === 'in_progress') || tasks.find(t => t.status === 'inbox') || tasks[0];
+          if (targetTask && activeProject) {
+            setLogs(prev => [...prev, `[GitHub Pull] Menarik perubahan kode (git diff) dari branch "${targetTask.branch_name}"...`]);
+            
+            fetch('/api/github/pull-changes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: user.id,
+                repoUrl: activeProject.github_repo_url,
+                branchName: targetTask.branch_name
+              })
+            })
+            .then(res => res.json())
+            .then(async (pullData) => {
+              if (pullData.success) {
+                setLogs(prev => [...prev, `[GitHub Pull] Sukses menarik diff perubahan. Karakter diff: ${pullData.diffText?.length || 0}`]);
+                
+                // Update status from in_progress to awaiting_review in database
+                try {
+                  const { error: statusError } = await supabase
+                    .from('tasks')
+                    .update({ status: 'awaiting_review', updated_at: new Date().toISOString() })
+                    .eq('id', targetTask.id);
+
+                  if (statusError) throw statusError;
+                  setLogs(prev => [...prev, `[System] Status task "${targetTask.title}" berhasil diperbarui ke Awaiting Review.`]);
+                  await fetchTasks();
+                } catch (statusErr: any) {
+                  console.error('Error updating status to awaiting_review:', statusErr);
+                  setLogs(prev => [...prev, `[System] Gagal memperbarui status ke Awaiting Review: ${statusErr.message || statusErr}`]);
+                }
+              } else {
+                setLogs(prev => [...prev, `[GitHub Pull] Gagal: ${pullData.error}`]);
+              }
+            })
+            .catch(err => {
+              console.error('Error in fetch pull-changes:', err);
+              setLogs(prev => [...prev, `[GitHub Pull] Error: ${err.message || err}`]);
+            });
+          }
         } else {
           setSimStep('ci_failed');
           setCiLogs(prev => [...prev, '❌ FAIL src/__tests__/evaluator.test.ts', '   Error: Expected status 200, got 500']);
