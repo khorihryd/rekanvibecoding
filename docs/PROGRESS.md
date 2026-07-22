@@ -11,7 +11,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
-| **Fase 3** | Otak CSA (AI Layer) | 6 | 3 | 50% |
+| **Fase 3** | Otak CSA (AI Layer) | 6 | 4 | 66% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
@@ -149,10 +149,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Integrasi decisions terhubung langsung ke state rendering database di dashboard.
 
 #### Task 3.4 — Endpoint dekomposisi task
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat API route `/api/csa/generate-task` yang mengompilasi context proyek terbaru dan semua keputusan arsitektur terdaftar, lalu memanggil Vercel AI SDK dengan `CSA_TASK_GENERATION_PROMPT` untuk memecah request pengguna menjadi spesifikasi teknis markdown. Hasil generator disimpan ke tabel `tasks` dengan status Draft. Menambahkan tombol "+ Buat Task Baru" dan modal generator di tab Kanban Board.
+- **File berubah:** `src/app/api/csa/generate-task/route.ts`, `src/app/dashboard/page.tsx`.
+- **Catatan:** RLS ditaati penuh. Generasi task menyertakan progress bar spinner di modal.
+
+#### Task 3.5 — Endpoint evaluasi perbedaan kode (diff evaluator)
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat API route POST `/api/csa/generate-task` yang mengompilasi seluruh keputusan arsitektur aktif dan context proyek saat ini, meminta LLM mendekomposisi kebutuhan fitur pengguna menjadi berkas spesifikasi markdown `NEXT_TASK_PROMPT.md` dan struktur task baru di tabel `tasks`.
+- **Rencana Tindakan:** Membuat API route POST `/api/csa/evaluate-diff` yang menerima spesifikasi tugas (task spec) dan code diff, mengulasnya dengan LLM menggunakan `CSA_VERIFICATION_PROMPT`, dan mengembalikan JSON terstruktur berisi status persetujuan, nilai skor, dan feedback perbaikan rinci.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 3 — Task 3.4: Endpoint dekomposisi task**
+- **Fase 3 — Task 3.5: Endpoint evaluasi perbedaan kode (diff evaluator)**

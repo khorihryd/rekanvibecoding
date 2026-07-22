@@ -145,6 +145,11 @@ export default function Home() {
   const [newRepoUrl, setNewRepoUrl] = useState('');
   const [newInstallationId, setNewInstallationId] = useState('');
 
+  // Create Task Form State
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [generatingTask, setGeneratingTask] = useState(false);
+
   // GitHub Repos & Connection State
   const [githubRepos, setGithubRepos] = useState<any[]>([]);
   const [isGithubConnected, setIsGithubConnected] = useState(false);
@@ -276,6 +281,59 @@ export default function Home() {
     }
   };
 
+  const fetchTasks = async () => {
+    if (!activeProject) return;
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('project_id', activeProject.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTasks(data || []);
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
+    }
+  };
+
+  const handleGenerateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim() || !activeProject) return;
+
+    try {
+      setGeneratingTask(true);
+      const res = await fetch('/api/csa/generate-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: activeProject.id,
+          userId: user.id,
+          taskTitle: newTaskTitle,
+          model: selectedModel
+        })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setIsCreateTaskModalOpen(false);
+        setNewTaskTitle('');
+        setLogs(prev => [...prev, `[System] Task "${data.task.title}" berhasil didekomposisi oleh CSA (Status: Draft).`]);
+        setNotifications(prev => [
+          ...prev,
+          { id: Date.now().toString(), text: `Task baru dibuat: ${data.task.title}`, type: 'success' }
+        ]);
+        await fetchTasks();
+      } else {
+        alert('Gagal membuat task: ' + data.error);
+      }
+    } catch (err: any) {
+      alert('Error saat mendekomposisi task: ' + (err.message || err));
+    } finally {
+      setGeneratingTask(false);
+    }
+  };
+
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProjectName.trim() || !user) return;
@@ -363,6 +421,7 @@ export default function Home() {
   useEffect(() => {
     if (activeProject) {
       fetchDecisions();
+      fetchTasks();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProject]);
@@ -1353,9 +1412,18 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
                     <h2 className="text-lg font-bold">Status Pelacakan Task</h2>
                     <p className="text-xs text-slate-400">Progres task yang diurai dari spec, dieksekusi oleh AE di repository.</p>
                   </div>
-                  <span className="text-xs text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 font-medium">
-                    Fase 6 — Dashboard Status
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setIsCreateTaskModalOpen(true)}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shadow-lg shadow-indigo-950/20 cursor-pointer"
+                    >
+                      <Plus size={14} />
+                      <span>Buat Task Baru</span>
+                    </button>
+                    <span className="text-xs text-indigo-300 bg-indigo-500/10 px-2 py-1.5 rounded border border-indigo-500/20 font-medium">
+                      Fase 3.4 — Task Generator
+                    </span>
+                  </div>
                 </div>
 
                 {/* Kanban Columns */}
@@ -1998,6 +2066,58 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create Task Modal */}
+      {isCreateTaskModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md glass-panel rounded-2xl border border-indigo-950/40 p-6 shadow-2xl relative animate-fade-in">
+            <h3 className="text-base font-bold text-slate-200 mb-4 text-gradient flex items-center gap-2">
+              <Kanban size={18} className="text-indigo-400" />
+              <span>Dekomposisi Task Baru</span>
+            </h3>
+            
+            {generatingTask ? (
+              <div className="py-8 flex flex-col items-center justify-center space-y-4 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-slate-200">CSA sedang merancang spesifikasi...</p>
+                  <p className="text-xs text-slate-400">Membaca context & keputusan arsitektur untuk menghasilkan spesifikasi teknis.</p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleGenerateTask} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-400">Judul Fitur / Task Baru</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Integrasi Sentry SDK"
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    className="w-full bg-slate-950/60 border border-indigo-950/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-2 justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateTaskModalOpen(false)}
+                    className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 text-xs px-4 py-2 rounded-lg transition-colors cursor-pointer font-medium"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Dekomposisi dengan CSA
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
