@@ -11,7 +11,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 0** | Fondasi Project | 4 | 4 | 100% |
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
-| **Fase 3** | Otak CSA (AI Layer) | 6 | 5 | 83% |
+| **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
@@ -112,7 +112,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 2.3 — Registrasi webhook ke GitHub API
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menginstal library `octokit`. Membuat API route `/api/github/register-webhook` untuk mendaftarkan URL webhook aplikasi Next.js ke repositori GitHub target menggunakan Octokit. Mengintegrasikannya to fungsi pembuatan proyek baru `handleCreateProject` di dashboard agar webhook otomatis terdaftar saat proyek dibuat.
+- **Ringkasan:** Menginstal library `octokit`. Membuat API route `/api/github/register-webhook` untuk mendaftarkan URL webhook aplikasi Next.js ke repositori GitHub target menggunakan Octokit. Mengintegrasikannya ke fungsi pembuatan proyek baru `handleCreateProject` di dashboard agar webhook otomatis terdaftar saat proyek dibuat.
 - **File berubah:** `package.json`, `package-lock.json`, `src/app/api/github/register-webhook/route.ts`, `src/app/dashboard/page.tsx`.
 - **Catatan:** Menyediakan fallback mockup aman jika credentials belum siap untuk dev offline.
 
@@ -146,7 +146,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Tanggal:** 2026-07-21
 - **Ringkasan:** Membuat API route `/api/csa/brainstorm` yang menyematkan status arsitektur proyek terbaru dari tabel `project_state` ke LLM query. Memperbarui dashboard UI chat input agar langsung memanggil endpoint ini. Menambahkan tombol "Simpan Keputusan" di UI Chat untuk menyimpan langsung analisis CSA ke tabel `decisions` database Supabase, dan mengaktifkan automasi seeding keputusan awal saat proyek baru dibuat.
 - **File berubah:** `src/app/api/csa/brainstorm/route.ts`, `src/app/dashboard/page.tsx`.
-- **Catatan:** Integrasi decisions terhubung langsung ke state rendering database di dashboard.
+- **Catatan:** Integrasi decisions terhubung langsung to state rendering database di dashboard.
 
 #### Task 3.4 — Endpoint dekomposisi task
 - **Status:** Selesai
@@ -163,10 +163,21 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Menyertakan ulasan mockup cerdas jika berjalan dalam offline dev mode untuk memeriksa keberadaan filter Sentry, try-catch, dan deteksi RLS bypass.
 
 #### Task 3.6 — Endpoint update status arsitektur (context updater)
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat API route `/api/csa/update-context` yang menerima diff task yang baru saja dimerge, memprosesnya dengan LLM untuk merumuskan update ringkasan arsitektur proyek terbaru, lalu merevisi kolom `context_markdown` di tabel `project_state` database Supabase.
+- **File berubah:** `src/app/api/csa/update-context/route.ts`.
+- **Catatan:** Menyertakan generator mockup cerdas untuk merumuskan baris pencapaian arsitektur terupdate berdasarkan git diff jika berjalan di mode offline.
+
+---
+
+### Fase 4 — Task Gen & Sinkronisasi Repo
+
+#### Task 4.1 — Sync spesifikasi task ke repository
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat API route POST `/api/csa/update-context` yang menerima diff task yang baru saja disetujui untuk dimerge, memprosesnya dengan LLM untuk merumuskan update ringkasan arsitektur proyek terbaru, lalu merevisi kolom `context_markdown` di tabel `project_state` database Supabase.
+- **Rencana Tindakan:** Membuat API route POST `/api/github/sync-task` untuk membuat branch baru `feature/task-{id}` pada repositori GitHub pengguna menggunakan Octokit, lalu melakukan commit berkas spesifikasi `csa-sync/inbox/task-{id}.md` di branch tersebut (atau ditiru jika token offline/dev).
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 3 — Task 3.6: Endpoint update status arsitektur (context updater)**
+- **Fase 4 — Task 4.1: Sync spesifikasi task ke repository**
