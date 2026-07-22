@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const { projectId, userId, diffText, model = 'gemini-1.5-pro' } = await request.json();
+    const { projectId, userId, diffText, model = 'gemini-3.5-flash' } = await request.json();
 
     if (!projectId || !userId || !diffText) {
       return NextResponse.json(

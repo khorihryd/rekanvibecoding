@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export interface GenerateTextOptions {
   prompt: string;
   systemPrompt?: string;
-  model?: 'gemini-1.5-pro' | 'gpt-4o' | 'claude-3-5-sonnet' | string;
+  model?: 'gemini-3.5-flash' | 'gpt-4o' | 'claude-3-5-sonnet' | string;
 }
 
 /**
@@ -20,7 +20,7 @@ export async function generateTextContent(options: GenerateTextOptions): Promise
   modelUsed: string;
   isMock: boolean;
 }> {
-  const { prompt, systemPrompt, model = 'gemini-1.5-pro' } = options;
+  const { prompt, systemPrompt, model = 'gemini-3.5-flash' } = options;
 
   const isGemini = model.startsWith('gemini');
   const isOpenAi = model.startsWith('gpt');
@@ -86,7 +86,7 @@ Ini adalah respon simulasi dalam mode offline. Untuk mengaktifkan respon AI sung
       aiModel = openai(model);
     } else {
       // Default to Google Gemini if not OpenAI or specifically Gemini
-      aiModel = google(model === 'gemini-1.5-pro' ? 'gemini-1.5-pro-latest' : 'gemini-1.5-flash');
+      aiModel = google(model === 'gemini-3.5-flash' ? 'gemini-1.5-flash' : model);
     }
 
     const response = await generateText({

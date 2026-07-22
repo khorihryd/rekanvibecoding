@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const prompt = searchParams.get('prompt') || 'Jelaskan mengapa modularitas penting dalam arsitektur software.';
-    const model = searchParams.get('model') || 'gemini-1.5-pro';
+    const model = searchParams.get('model') || 'gemini-3.5-flash';
 
     const result = await generateTextContent({
       prompt,

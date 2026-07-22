@@ -1464,7 +1464,7 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
               className="bg-transparent text-slate-200 focus:outline-none cursor-pointer font-semibold"
             >
               <option value="claude-3-5-sonnet" className="bg-[#0f111a]">Claude 3.5 Sonnet</option>
-              <option value="gemini-1-5-pro" className="bg-[#0f111a]">Gemini 1.5 Pro</option>
+              <option value="gemini-3.5-flash" className="bg-[#0f111a]">Gemini 3.5 Flash</option>
               <option value="gpt-4o" className="bg-[#0f111a]">GPT-4o</option>
             </select>
           </div>
