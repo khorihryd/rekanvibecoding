@@ -38,15 +38,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Read AGENTS.md from workspace root
+    // Read AGENTS.md template for target repo from templates folder
     let agentsContent = '';
     try {
-      const agentsPath = path.join(process.cwd(), 'AGENTS.md');
+      const agentsPath = path.join(process.cwd(), 'src', 'lib', 'templates', 'agents-target-repo.md');
       agentsContent = fs.readFileSync(agentsPath, 'utf8');
     } catch (fsErr: any) {
-      console.error('Error reading AGENTS.md from disk:', fsErr);
+      console.error('Error reading agents-target-repo.md from disk:', fsErr);
       return NextResponse.json(
-        { success: false, error: `Gagal membaca template AGENTS.md dari disk server: ${fsErr.message}` },
+        { success: false, error: `Gagal membaca template agents-target-repo.md dari disk server: ${fsErr.message}` },
         { status: 500 }
       );
     }

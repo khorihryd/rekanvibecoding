@@ -43,6 +43,24 @@ Dokumen ini berisi task koreksi atas temuan review terhadap `docs/PROGRESS.md` y
 
 ---
 
+## Koreksi 3.1 — Pisahkan Template `AGENTS.md` untuk Repo Target End-User
+
+**Masalah:** Koreksi 3 sudah benar secara teknis (push file sungguhan via GitHub API), tapi isi file yang di-push adalah `AGENTS.md` milik aplikasi CSA sendiri (dipakai untuk memandu pembangunan CSA di repo `rekanvibecoding`) — file ini menyebut `docs/PRD.md`, `docs/ROADMAP.md`, `docs/PROGRESS.md` dengan task bernomor statis. Padahal mekanisme nyata yang dipakai CSA untuk berkomunikasi dengan AI Engineer di repo **project milik end-user** adalah folder `csa-sync/inbox` (task per-iterasi) dan `csa-sync/outbox` (laporan) — sama sekali tidak disebut di file yang di-push. Akibatnya AI Engineer di project end-user tidak akan tahu harus mengecek `csa-sync/inbox` untuk menemukan task barunya.
+
+**Definisi Selesai:**
+- Buat file template baru, misal `src/lib/templates/agents-target-repo.md` (atau konstanta string di kode), **terpisah** dari `AGENTS.md` milik root aplikasi CSA sendiri
+- Isi template ini wajib eksplisit menyebut:
+  - Sebelum kerja, wajib baca `csa-sync/context.md` untuk memahami state project terkini
+  - Cek folder `csa-sync/inbox/` untuk file task terbaru yang perlu dikerjakan (format `task-{id}.md`)
+  - Setelah selesai, tulis laporan ke `csa-sync/outbox/report-{id}.md` sesuai format yang sudah dibakukan (field: task_id, status, ringkasan perubahan, file yang diubah, catatan untuk CSA)
+  - Jangan pernah menyentuh atau merge langsung ke branch main — itu wewenang CSA
+  - Aturan dasar lain yang relevan (satu task per sesi, commit per task, jangan hapus fitur lama) tetap dipertahankan dari `AGENTS.md` versi lama, disesuaikan konteksnya
+- Update `src/app/api/github/push-agents/route.ts` supaya membaca dari template baru ini, **bukan** dari `AGENTS.md` root aplikasi CSA
+- `AGENTS.md` di root aplikasi CSA (`rekanvibecoding`) tetap dipertahankan apa adanya — itu khusus untuk memandu pembangunan CSA itu sendiri, tidak untuk di-push ke repo lain
+- Uji: buat project baru yang terhubung ke repo test, verifikasi isi `AGENTS.md` yang muncul di repo tersebut memuat instruksi `csa-sync/inbox`/`csa-sync/outbox`, bukan instruksi `docs/ROADMAP.md`
+
+---
+
 ## Koreksi 4 — Sinkronkan Dokumen Repo dengan Versi Terbaru
 
 **Masalah:** `docs/ROADMAP.md` dan `docs/BRD.md` di repo belum memuat revisi terakhir (Fase 7.5 — mode self-hosted vs hosted & sistem token; section 3.1 BRD — model bisnis). AI Engineer bekerja dari rencana yang sudah kadaluarsa.

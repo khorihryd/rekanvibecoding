@@ -376,5 +376,14 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 
 ---
 
+### Koreksi 3.1 — Pisahkan Template AGENTS.md untuk Repo Target End-User
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat berkas template instruksi agen target baru `src/lib/templates/agents-target-repo.md` yang secara eksplisit memandu AI coding agent di repositori pengguna untuk berinteraksi via folder `csa-sync/inbox/` (untuk task) dan `csa-sync/outbox/` (untuk laporan). Memperbarui endpoint `/api/github/push-agents` agar menyinkronkan berkas dari template target terpisah ini, dan tetap mempertahankan berkas `AGENTS.md` root asli agar tidak terganggu.
+- **File berubah:** `src/lib/templates/agents-target-repo.md`, `src/app/api/github/push-agents/route.ts`
+- **Catatan untuk manusia:** Ini menjamin instruksi yang di-push ke repositori pengguna relevan dengan antarmuka sinkronisasi folder proyek dan tidak merujuk ke task statis roadmap internal CSA.
+
+---
+
 ## Task Berikutnya yang Akan Dikerjakan
 - **Koreksi 4 — Sinkronkan Dokumen Repo dengan Versi Terbaru**
