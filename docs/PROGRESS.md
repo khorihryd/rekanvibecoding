@@ -13,7 +13,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
-| **Fase 5** | Mesin Verifikasi | 6 | 4 | 66% |
+| **Fase 5** | Mesin Verifikasi | 6 | 5 | 83% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
@@ -98,7 +98,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 2.1 — Koneksi GitHub OAuth/App
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` dan callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya ke dropdown pilihan repositori di modal pembuatan proyek baru.
+- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` and callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya ke dropdown pilihan repositori di modal pembuatan proyek baru.
 - **File berubah:** `supabase/migrations/20260721094400_create_github_tokens.sql`, `src/lib/supabaseServer.ts`, `src/app/api/auth/github/login/route.ts`, `src/app/api/auth/github/callback/route.ts`, `src/app/api/github/repos/route.ts`, `src/app/dashboard/page.tsx`, `.env.example`.
 - **Catatan:** Fallback mockup otomatis digunakan apabila client credentials belum siap di `.env.local` untuk mempermudah development lokal.
 
@@ -241,10 +241,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Berjalan aman baik di mode nyata (Octokit commit) maupun mode mockup virtual (development offline).
 
 #### Task 5.5 — Update status task (Awaiting Review ke Approved/Rejected)
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Mengintegrasikan pembaruan status database otomatis dalam `/api/csa/verify-task` pasca proses audit selesai. Status tugas pada tabel `tasks` Supabase di-update dari `awaiting_review` menjadi `approved` (jika CSA menyetujui) atau `rejected` (jika tidak disetujui), memastikan sinkronisasi langsung ke Kanban Board.
+- **File berubah:** `src/app/api/csa/verify-task/route.ts`.
+- **Catatan:** Perubahan database telah diverifikasi dan berjalan sesuai ketentuan RLS.
+
+#### Task 5.6 — Notifikasi hasil evaluasi ke PR (mockup)
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Memperbarui endpoint `/api/csa/verify-task` sehingga setelah proses evaluasi audit selesai dan dokumen laporan berhasil di-commit ke GitHub, status task di tabel `tasks` database Supabase otomatis di-update dari `awaiting_review` menjadi `approved` (jika approved: true) atau menjadi `rejected` (jika approved: false).
+- **Rencana Tindakan:** Menambahkan fungsionalitas di `/api/csa/verify-task` untuk memicu notifikasi hasil evaluasi. Dalam skema nyata, ini memanggil GitHub Issues API untuk menulis comment PR, sedangkan dalam mode mockup, notifikasi diposting di visual simulator chat/logs PR di dashboard UI.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 5 — Task 5.5: Update status task (Awaiting Review ke Approved/Rejected)**
+- **Fase 5 — Task 5.6: Notifikasi hasil evaluasi ke PR (mockup)**

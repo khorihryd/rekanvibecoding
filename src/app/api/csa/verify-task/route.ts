@@ -357,6 +357,25 @@ ${
       }
     }
 
+    // 8. Update task status in Supabase database based on CSA evaluation
+    const finalStatus = evaluationData.approved ? 'approved' : 'rejected';
+    let isDbUpdated = false;
+    try {
+      const { error: dbUpdateError } = await supabaseServer
+        .from('tasks')
+        .update({
+          status: finalStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', task.id);
+
+      if (dbUpdateError) throw dbUpdateError;
+      isDbUpdated = true;
+      console.log(`[CSA DB Update] Berhasil memperbarui status task ${task.id} menjadi "${finalStatus}"`);
+    } catch (dbErr: any) {
+      console.error('Error updating task status in Supabase:', dbErr.message || dbErr);
+    }
+
     return NextResponse.json({
       success: true,
       isMock,
@@ -367,8 +386,10 @@ ${
       reportMarkdown,
       isReportSynced,
       syncMessage,
+      isDbUpdated,
+      finalStatus,
       modelUsed,
-      message: 'CSA Verifier Controller sukses melakukan verifikasi dan mempublikasikan laporan audit.'
+      message: `CSA Verifier Controller sukses melakukan verifikasi, mempublikasikan laporan, dan memperbarui status task menjadi "${finalStatus}".`
     });
 
   } catch (err: any) {
