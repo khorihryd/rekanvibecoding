@@ -124,7 +124,7 @@ index 8b9c7d2..6f5e4d2 100644
           repo = parts[1]?.replace('.git', '');
         }
 
-        const accessToken = tokenData.access_token;
+        const accessToken = tokenData?.access_token || '';
         const octokit = new Octokit({ auth: accessToken });
 
         // Get default branch
@@ -152,38 +152,166 @@ index 8b9c7d2..6f5e4d2 100644
       }
     }
 
-    // Static Audit Pre-checks (Hard rejection rules: RLS bypass & missing error handling)
-    const lowerDiff = diffText.toLowerCase();
-    const hasRlsBypass = lowerDiff.includes('service_role') || lowerDiff.includes('bypass_rls') || lowerDiff.includes('supabase_service_key');
-    
-    // We expect JS/TS files to have error handling (try/catch) and sentry integrations if they are modified
-    const hasErrorHandling = lowerDiff.includes('try') || lowerDiff.includes('catch') || lowerDiff.includes('sentry');
+    // CI/CD Status Check (Koreksi 2)
+    let ciStatus: 'success' | 'failure' | 'pending' | 'missing_ci' = 'success';
+    let ciLink = '';
+
+    if (isMock) {
+      const lowerBranch = branchName.toLowerCase();
+      if (lowerBranch.includes('ci-fail') || lowerBranch.includes('ci-failure')) {
+        ciStatus = 'failure';
+        ciLink = 'https://github.com/mock-owner/mock-repo/actions/runs/123456 (MOCK RUN - FAILURE)';
+      } else if (lowerBranch.includes('ci-pending') || lowerBranch.includes('ci-wait')) {
+        ciStatus = 'pending';
+        ciLink = 'https://github.com/mock-owner/mock-repo/actions/runs/123456 (MOCK RUN - PENDING)';
+      } else if (lowerBranch.includes('ci-missing') || lowerBranch.includes('ci-none')) {
+        ciStatus = 'missing_ci';
+      } else {
+        ciStatus = 'success';
+        ciLink = 'https://github.com/mock-owner/mock-repo/actions/runs/123456 (MOCK RUN - SUCCESS)';
+      }
+      console.log(`[CSA Verification Controller] Mode mockup aktif. Status CI/CD dinilai: ${ciStatus}`);
+    } else {
+      // Connect to GitHub API and read actual check runs and commit statuses
+      try {
+        let owner = '';
+        let repo = '';
+
+        if (repoUrl.includes('github.com/')) {
+          const parts = repoUrl.split('github.com/')[1].split('/');
+          owner = parts[0];
+          repo = parts[1]?.replace('.git', '');
+        }
+
+        const accessToken = tokenData?.access_token || '';
+        const octokit = new Octokit({ auth: accessToken });
+
+        console.log(`[CSA Verification Controller] Memanggil API GitHub: list check runs untuk branch "${branchName}"...`);
+        const checksResponse = await octokit.rest.checks.listForRef({
+          owner,
+          repo,
+          ref: branchName
+        });
+
+        console.log(`[CSA Verification Controller] Memanggil API GitHub: get combined status untuk branch "${branchName}"...`);
+        const statusResponse = await octokit.rest.repos.getCombinedStatusForRef({
+          owner,
+          repo,
+          ref: branchName
+        });
+
+        const checkRuns = checksResponse.data.check_runs || [];
+        const statuses = statusResponse.data.statuses || [];
+
+        const hasCheckRuns = checkRuns.length > 0;
+        const hasStatuses = statuses.length > 0;
+
+        if (!hasCheckRuns && !hasStatuses) {
+          // No CI runs/statuses found at all
+          ciStatus = 'missing_ci';
+        } else {
+          // Parse check runs
+          let checksPending = false;
+          let checksFailed = false;
+
+          for (const run of checkRuns) {
+            if (run.status === 'queued' || run.status === 'in_progress') {
+              checksPending = true;
+            } else if (run.status === 'completed') {
+              if (run.conclusion === 'failure' || run.conclusion === 'action_required' || run.conclusion === 'timed_out' || run.conclusion === 'cancelled') {
+                checksFailed = true;
+              }
+            }
+          }
+
+          // Parse status API
+          let statusPending = statusResponse.data.state === 'pending';
+          let statusFailed = statusResponse.data.state === 'failure' || statusResponse.data.state === 'error';
+
+          // Combine results
+          if (checksFailed || statusFailed) {
+            ciStatus = 'failure';
+          } else if (checksPending || statusPending) {
+            ciStatus = 'pending';
+          } else {
+            ciStatus = 'success';
+          }
+
+          // Get first check run link or fallback status link
+          if (checkRuns.length > 0) {
+            ciLink = checkRuns[0].html_url || '';
+          } else if (statuses.length > 0) {
+            ciLink = statuses[0].target_url || '';
+          }
+        }
+        console.log(`[CSA Verification Controller] Status CI/CD riil: ${ciStatus}`);
+      } catch (ciErr: any) {
+        console.error('Error fetching CI check status from GitHub API:', ciErr.message || ciErr);
+        // Fallback to missing_ci if api fails
+        ciStatus = 'missing_ci';
+      }
+    }
+
+    // Handle CI blockers (Pending or Missing)
+    if (ciStatus === 'pending') {
+      return NextResponse.json(
+        { success: false, error: 'Verifikasi Ditahan: Menunggu hasil CI/CD GitHub Actions selesai berjalan di branch Anda.' },
+        { status: 400 }
+      );
+    }
+
+    if (ciStatus === 'missing_ci') {
+      return NextResponse.json(
+        { success: false, error: 'Verifikasi Ditahan: Belum ada konfigurasi CI/CD GitHub Actions atau status check yang terdeteksi pada branch Anda. Harap jalankan test/CI terlebih dahulu.' },
+        { status: 400 }
+      );
+    }
 
     let evaluationData: any = null;
     let hardRejection = false;
 
-    if (hasRlsBypass) {
+    if (ciStatus === 'failure') {
       hardRejection = true;
       evaluationData = {
         approved: false,
-        score: 30,
-        reasoning: '[Audit Penolakan Keras Static Check] Kode ditolak otomatis karena terdeteksi potensi celah keamanan RLS bypass atau pemanggilan service role key dari client-side UI.',
+        score: 0,
+        reasoning: `[Audit Hasil CI/CD Gagal] Pengujian CI/CD (GitHub Actions/status check) pada branch "${branchName}" melaporkan status FAILURE. Berdasarkan aturan integrasi berkelanjutan (CI/CD), peninjauan otomatis ditolak tanpa evaluasi AI tambahan.`,
         feedback: [
-          'Dilarang memanggil service_role client dari sisi UI frontend.',
-          'Semua endpoint/operasi database harus mematuhi Supabase Row Level Security (RLS) user session.'
+          `Perbaiki kegagalan build/test yang tertera pada CI run: ${ciLink || 'GitHub Actions Run'}`,
+          'Pastikan seluruh test lokal dan integrasi lolos sebelum meminta evaluasi ulang.'
         ]
       };
-    } else if (!hasErrorHandling) {
-      hardRejection = true;
-      evaluationData = {
-        approved: false,
-        score: 55,
-        reasoning: '[Audit Penolakan Keras Static Check] Kode ditolak otomatis karena tidak menyertakan penanganan error (try/catch) atau integrasi Sentry pada berkas logika yang diubah.',
-        feedback: [
-          'Seluruh pemanggilan API luar, endpoint server, dan query database wajib dibungkus try/catch block.',
-          'Tangkap exception dan pastikan dikirim ke Sentry untuk penelusuran error.'
-        ]
-      };
+    } else {
+      // Static Audit Pre-checks (Lapisan Heuristik Tambahan)
+      // CATATAN: Ini adalah lapisan pemeriksaan cepat (heuristik tambahan) untuk mendeteksi bypass RLS 
+      // atau hilangnya exception handling sebelum memicu evaluasi AI, bukan merupakan sumber kebenaran utama.
+      const lowerDiff = diffText.toLowerCase();
+      const hasRlsBypass = lowerDiff.includes('service_role') || lowerDiff.includes('bypass_rls') || lowerDiff.includes('supabase_service_key');
+      const hasErrorHandling = lowerDiff.includes('try') || lowerDiff.includes('catch') || lowerDiff.includes('sentry');
+
+      if (hasRlsBypass) {
+        hardRejection = true;
+        evaluationData = {
+          approved: false,
+          score: 30,
+          reasoning: '[Audit Penolakan Keras Static Check] Kode ditolak otomatis karena terdeteksi potensi celah keamanan RLS bypass atau pemanggilan service role key dari client-side UI.',
+          feedback: [
+            'Dilarang memanggil service_role client dari sisi UI frontend.',
+            'Semua endpoint/operasi database harus mematuhi Supabase Row Level Security (RLS) user session.'
+          ]
+        };
+      } else if (!hasErrorHandling) {
+        hardRejection = true;
+        evaluationData = {
+          approved: false,
+          score: 55,
+          reasoning: '[Audit Penolakan Keras Static Check] Kode ditolak otomatis karena tidak menyertakan penanganan error (try/catch) atau integrasi Sentry pada berkas logika yang diubah.',
+          feedback: [
+            'Seluruh pemanggilan API luar, endpoint server, dan query database wajib dibungkus try/catch block.',
+            'Tangkap exception dan pastikan dikirim ke Sentry untuk penelusuran error.'
+          ]
+        };
+      }
     }
 
     let modelUsed = 'MockEngine';
@@ -288,6 +416,10 @@ Kembalikan respon evaluasi final Anda dalam format JSON murni dengan skema berik
 **Branch:** ${branchName}
 **Hasil Penilaian:** ${evaluationData.approved ? '✅ APPROVED (TEKNIS)' : '❌ REJECTED'}
 **Skor Kualitas:** ${evaluationData.score}/100
+
+## 🚦 Status Integrasi Berkelanjutan (CI/CD)
+- **Status CI/CD:** ${ciStatus.toUpperCase()} ${ciStatus === 'success' ? '✅' : '❌'}
+- **Tautan CI Run:** ${ciLink ? `[GitHub Action/Status Run](${ciLink})` : '*Tidak ada link tersedia (mocked/offline)*'}
 
 ## 1. Analisis & Reasoning
 ${evaluationData.reasoning}

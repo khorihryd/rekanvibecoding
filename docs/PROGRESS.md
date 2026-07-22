@@ -358,5 +358,14 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 
 ---
 
+### Koreksi 2 — Verifikasi CSA Wajib Baca Hasil GitHub Actions/CI Sungguhan
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Mengintegrasikan pemanggilan API GitHub `octokit.rest.checks.listForRef()` dan `octokit.rest.repos.getCombinedStatusForRef()` untuk memeriksa status check run (pass/fail/pending) pada branch task terkait. Menambahkan logika blocker yang menahan evaluasi AI jika CI berstatus pending/tidak ada, serta otomatis melakukan `rejected` pada task jika CI mengalami kegagalan (failure), lengkap dengan mencantumkan tautan/status CI pada berkas laporan audit markdown.
+- **File berubah:** `src/app/api/csa/verify-task/route.ts`
+- **Catatan untuk manusia:** Koreksi ini memperbaiki simulasi pengujian CI/CD sebelumnya menjadi integrasi nyata dengan GitHub Actions API. Heuristik pencocokan kata (try/catch, Sentry, RLS bypass) tetap dipertahankan sebagai lapisan pengaman statis tambahan.
+
+---
+
 ## Task Berikutnya yang Akan Dikerjakan
-- **Koreksi 2 — Verifikasi CSA Wajib Baca Hasil GitHub Actions/CI Sungguhan**
+- **Koreksi 3 — Push AGENTS.md Sungguhan ke Repository User**
