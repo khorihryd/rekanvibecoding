@@ -13,7 +13,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
-| **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
+| **Fase 5** | Mesin Verifikasi | 6 | 1 | 16% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
@@ -213,11 +213,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 ### Fase 5 — Mesin Verifikasi
 
 #### Task 5.1 — Baca spec task dari DB & diff kode
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat API route `/api/csa/verify-task` yang bertindak sebagai controller verifikasi utama. API ini membaca spesifikasi markdown dari DB (`tasks` table) dan memicu penarikan diff perubahan kode branch terkait dari repository GitHub (menggunakan helper Octokit compareCommits).
+- **File berubah:** `src/app/api/csa/verify-task/route.ts`.
+- **Catatan:** Struktur data diff & spesifikasi berhasil disiapkan secara asinkron.
+
+#### Task 5.2 — Uji kecocokan kriteria "Definisi Selesai"
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat kerangka verifikator server-side atau controller pendukung di mana asisten arsitek membaca isi spesifikasi teknis (`spec_markdown`) dan teks perbedaan kode (`diff_text`) dari database untuk siap diumpankan ke API mesin evaluator CSA.
-- **File berubah:** (Akan dikerjakan)
+- **Rencana Tindakan:** Memperbarui endpoint `/api/csa/verify-task` agar setelah spec dan diff berhasil dibaca (Task 5.1), API langsung meneruskannya ke model LLM verifikator dengan instruksi evaluasi kecocokan spesifikasi kriteria selesai ("Definition of Done").
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 5 — Task 5.1: Baca spec task dari DB & diff kode**
+- **Fase 5 — Task 5.2: Uji kecocokan kriteria "Definisi Selesai"**
