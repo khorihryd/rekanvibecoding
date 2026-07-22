@@ -13,7 +13,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
-| **Fase 5** | Mesin Verifikasi | 6 | 1 | 16% |
+| **Fase 5** | Mesin Verifikasi | 6 | 2 | 33% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
@@ -220,10 +220,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Struktur data diff & spesifikasi berhasil disiapkan secara asinkron.
 
 #### Task 5.2 — Uji kecocokan kriteria "Definisi Selesai"
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Memperbarui API route `/api/csa/verify-task` agar setelah spec & diff berhasil dimuat, controller langsung memicu pemrosesan audit kriteria selesai ("Definition of Done") dengan mengumpankannya ke LLM menggunakan `CSA_VERIFICATION_PROMPT`.
+- **File berubah:** `src/app/api/csa/verify-task/route.ts`.
+- **Catatan:** Output audit dirancang menghasilkan JSON terstruktur (approved, score, reasoning, feedback).
+
+#### Task 5.3 — Evaluasi aturan khusus & penolakan keras
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Memperbarui endpoint `/api/csa/verify-task` agar setelah spec dan diff berhasil dibaca (Task 5.1), API langsung meneruskannya ke model LLM verifikator dengan instruksi evaluasi kecocokan spesifikasi kriteria selesai ("Definition of Done").
+- **Rencana Tindakan:** Mengembangkan dan merinci aturan penolakan keras (seperti bypass RLS Supabase dan ketiadaan error tracking) secara eksplisit di dalam evaluasi LLM `/api/csa/verify-task` dan menguji respon penolakannya secara lokal.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 5 — Task 5.2: Uji kecocokan kriteria "Definisi Selesai"**
+- **Fase 5 — Task 5.3: Evaluasi aturan khusus & penolakan keras**
