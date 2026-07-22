@@ -745,36 +745,67 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
 
   // Run Simulator Workflow Steps
   // Step 1: AE Pushes code
-  const triggerAePush = () => {
+  const triggerAePush = async () => {
     setSimStep('push');
-    setSimWebhookPayload(JSON.stringify({
-      ref: 'refs/heads/feature/csa-auto-review',
+
+    // Dynamically resolve target repo name and branch name based on active project
+    const repoFullName = activeProject?.github_repo_url 
+      ? activeProject.github_repo_url.split('github.com/')[1] || 'khori/rekanvibecoding'
+      : 'khori/rekanvibecoding';
+      
+    // Find task matching status 'inbox' or 'draft' to simulate push on
+    const targetTask = tasks.find(t => t.status === 'inbox' || t.status === 'draft') || tasks[0];
+    const targetBranch = targetTask?.branch_name || 'feature/csa-auto-review';
+
+    const webhookPayload = {
+      ref: `refs/heads/${targetBranch}`,
       before: 'a2b3c4d5e6f7g8h9',
       after: 'c8d7e6f5g4h3i2j1',
       repository: {
-        name: 'rekanvibecoding',
-        url: 'https://github.com/khori/rekanvibecoding'
+        name: repoFullName.split('/')[1] || 'rekanvibecoding',
+        full_name: repoFullName
       },
       pusher: { name: 'ai-engineer-claudecode' },
       commits: [{
         id: 'c8d7e6f5g4h3i2j1',
-        message: 'feat: implement auto-review webhook and LLM evaluator client',
+        message: targetTask 
+          ? `feat: implement changes for task ${targetTask.title}` 
+          : 'feat: implement auto-review webhook and LLM evaluator client',
         timestamp: new Date().toISOString(),
         added: ['src/app/api/webhook/github/route.ts', 'src/lib/csa/evaluator.ts'],
         modified: ['src/app/globals.css', 'package.json']
       }]
-    }, null, 2));
+    };
+
+    setSimWebhookPayload(JSON.stringify(webhookPayload, null, 2));
 
     setLogs(prev => [
       ...prev,
-      `[Webhook] Menerima push event di branch feature/csa-auto-review`,
-      `[Webhook] Commit: "feat: implement auto-review webhook and LLM evaluator client" oleh ai-engineer-claudecode`,
-      `[CSA] Mendeteksi laporan outbox baru: csa-sync/outbox/report-5.md`
+      `[Webhook Simulator] Mengirim push event untuk branch "${targetBranch}" ke endpoint webhook...`
     ]);
 
-    // Update tasks status to in_progress
-    const updatedTasks = tasks.map(t => t.id === 'task-5' ? { ...t, status: 'in_progress' as const } : t);
-    saveDb(decisions, updatedTasks);
+    try {
+      const res = await fetch('/api/webhook/github', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(webhookPayload)
+      });
+      const data = await res.json();
+      
+      if (data.received) {
+        setLogs(prev => [
+          ...prev,
+          `[Webhook] Webhook berhasil dipanggil. Terdeteksi ${data.updatedTasksCount} task status inbox diperbarui ke in_progress.`
+        ]);
+        await fetchTasks();
+      } else {
+        setLogs(prev => [...prev, `[Webhook] Gagal memproses event push: ${data.error}`]);
+      }
+    } catch (err: any) {
+      console.error('Error triggering webhook:', err);
+      setLogs(prev => [...prev, `[Webhook] Gagal memanggil webhook: ${err.message || err}`]);
+    }
+
     setActiveTab('repo');
     setActiveFile('csa-sync/outbox/report-5.md');
   };

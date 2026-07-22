@@ -12,7 +12,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
-| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 2 | 40% |
+| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 3 | 60% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
@@ -188,10 +188,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Transisi status divalidasi dan berjalan mulus dalam workflow pembuatan task.
 
 #### Task 4.3 — Deteksi trigger webhook ke status In Progress
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Memperbarui route `/api/webhook/github` untuk melakukan kueri database Supabase berdasarkan branch event push, mencocokkannya dengan repo project, lalu memperbarui status task ke `in_progress`. Memperbarui webhook simulator dashboard (`triggerAePush`) agar menembakkan request POST nyata ke endpoint webhook ini untuk memperlancar visualisasi Kanban.
+- **File berubah:** `src/app/api/webhook/github/route.ts`, `src/app/dashboard/page.tsx`.
+- **Catatan:** Berjalan dinamis terintegrasi penuh.
+
+#### Task 4.4 — Pull code perubahan dari repository
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Memodifikasi GitHub webhook receiver di `src/app/api/webhook/github/route.ts` agar memeriksa branch yang di-push. Jika branch tersebut cocok dengan format branch task (`feature/task-{id}` atau padanannya), ubah status baris task yang bersangkutan di Supabase `tasks` dari `inbox` menjadi `in_progress`.
+- **Rencana Tindakan:** Membuat API route GET/POST `/api/github/pull-changes` yang memicu pemanggilan `octokit.rest.repos.compareCommits` untuk menarik perbedaan kode (git diff) antara branch task (`feature/task-{id}`) dengan branch default (`main` / `master`) untuk dievaluasi oleh CSA.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 4 — Task 4.3: Deteksi trigger webhook ke status In Progress**
+- **Fase 4 — Task 4.4: Pull code perubahan dari repository**

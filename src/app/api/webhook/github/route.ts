@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 export async function POST(request: Request) {
   try {
@@ -23,13 +24,48 @@ export async function POST(request: Request) {
     });
     console.log('================================================================');
 
+    // Query tasks matching this branch name along with their project URL
+    const { data: tasks, error: dbError } = await supabaseServer
+      .from('tasks')
+      .select('*, projects:project_id(github_repo_url)')
+      .eq('branch_name', branch);
+
+    let updatedTasksCount = 0;
+
+    if (!dbError && tasks && tasks.length > 0) {
+      for (const task of tasks) {
+        if (task.status === 'inbox') {
+          const projectRepoUrl = (task.projects as any)?.github_repo_url || '';
+          
+          // Verify that the webhook repo matches the task's project repo URL
+          if (projectRepoUrl.toLowerCase().includes(repoName.toLowerCase())) {
+            const { error: updateError } = await supabaseServer
+              .from('tasks')
+              .update({
+                status: 'in_progress',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', task.id);
+
+            if (!updateError) {
+              console.log(`[Webhook Update] Task "${task.title}" (ID: ${task.id}) berhasil dipindahkan ke IN_PROGRESS.`);
+              updatedTasksCount++;
+            } else {
+              console.error(`[Webhook Update Error] Gagal update status task ${task.id}:`, updateError.message);
+            }
+          }
+        }
+      }
+    }
+
     // Return success response to GitHub Webhook Engine
     return NextResponse.json({
       received: true,
       repository: repoName,
       branch: branch,
       pusher: pusher,
-      commitCount: commits.length
+      commitCount: commits.length,
+      updatedTasksCount
     }, { status: 200 });
 
   } catch (err: any) {
