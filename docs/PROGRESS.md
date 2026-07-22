@@ -347,5 +347,16 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 
 ---
 
+## Log Koreksi Review
+
+### Koreksi 1 — Implementasikan Merge Sungguhan ke Branch Main
+- **Status:** Selesai (Menunggu Kredensial untuk Verifikasi Nyata)
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat API route baru `/api/github/merge-task` yang memanggil GitHub Octokit API untuk membuat PR (jika belum ada) dan melakukan merge secara asinkron. Memperbarui client-side `handleMergeToMain` agar memanggil API ini dan memperbarui status task ke `merged` di database Supabase hanya jika API mengembalikan respons sukses, lengkap dengan pemisahan log mode mockup yang jujur dan penanganan error.
+- **File berubah:** `src/app/api/github/merge-task/route.ts`, `src/app/dashboard/page.tsx`
+- **Catatan untuk manusia:** Untuk menguji alur merge nyata secara E2E di luar mode mockup, silakan tambahkan `SUPABASE_SERVICE_ROLE_KEY` di berkas `.env.local` dan pastikan tabel `github_tokens` di database berisi token akses GitHub yang memiliki hak tulis (write access) ke repositori khorihryd/rekanvibecoding.
+
+---
+
 ## Task Berikutnya yang Akan Dikerjakan
-- **Semua Fase Selesai (Proyek Siap Dirilis)**
+- **Koreksi 2 — Verifikasi CSA Wajib Baca Hasil GitHub Actions/CI Sungguhan**

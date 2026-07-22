@@ -1136,10 +1136,57 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
       ...prev,
       `[Merge Gate] Memulai penggabungan kode (merge) untuk task: "${targetTask.title}"`,
       `[Database] Memperbarui status task menjadi "merged" di database Supabase...`
-    ]);
+    ]);    try {
+      // 1. Call GitHub Merge endpoint first!
+      setLogs(prev => [
+        ...prev,
+        `[GitHub API] Menghubungi endpoint penggabungan branch /api/github/merge-task...`
+      ]);
 
-    try {
-      // 1. Update task status in Supabase database to 'merged'
+      const mergeRes = await fetch('/api/github/merge-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          projectId: activeProject.id,
+          taskId: targetTask.id,
+          repoUrl: activeProject.github_repo_url,
+          branchName: targetTask.branch_name || `feature/task-${targetTask.id}`
+        })
+      });
+
+      if (!mergeRes.ok) {
+        const errorData = await mergeRes.json();
+        throw new Error(errorData.error || 'Server error saat melakukan merge branch di GitHub.');
+      }
+
+      const mergeData = await mergeRes.json();
+
+      if (!mergeData.success) {
+        throw new Error(mergeData.error || 'Gagal melakukan merge branch di GitHub.');
+      }
+
+      // Output dynamic log message depending on whether it is mock or real
+      if (mergeData.isMock) {
+        setLogs(prev => [
+          ...prev,
+          `[GitHub API] ⚠️ ${mergeData.message}`,
+          `[GitHub API] Catatan: PR tidak digabungkan di GitHub asli (offline/mode mockup).`
+        ]);
+      } else {
+        setLogs(prev => [
+          ...prev,
+          `[GitHub API] ✅ ${mergeData.message}`,
+          `[GitHub API] PR #${mergeData.prNumber} berhasil di-merge secara nyata di GitHub.`
+        ]);
+      }
+
+      // 2. ONLY AFTER SUCCESS, update the task status in Supabase database to 'merged'
+      setLogs(prev => [
+        ...prev,
+        `[Database] Memperbarui status task menjadi "merged" di database Supabase...`
+      ]);
+
       const { error: dbUpdateError } = await supabase
         .from('tasks')
         .update({
@@ -1148,9 +1195,16 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
         })
         .eq('id', targetTask.id);
 
-      if (dbUpdateError) throw dbUpdateError;
+      if (dbUpdateError) {
+        throw new Error(`Merge sukses di GitHub, tetapi gagal memperbarui database: ${dbUpdateError.message}`);
+      }
 
-      // 1.5. Save Environment Variables securely (Task 7.4)
+      setLogs(prev => [
+        ...prev,
+        `[Database] Status task sukses diperbarui ke "merged".`
+      ]);
+
+      // 3. Save Environment Variables securely (Task 7.4)
       if (envSecrets.trim()) {
         localStorage.setItem(`csa_env_secrets_${activeProject.id}_${targetTask.id}`, envSecrets.trim());
         setLogs(prev => [
@@ -1161,8 +1215,6 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
 
       setLogs(prev => [
         ...prev,
-        `[Database] Status task sukses diperbarui ke "merged".`,
-        `[Octokit] Memanggil API GitHub: merge branch... (mocked in offline mode)`,
         `[CSA Context Updater] Memicu pembaruan dokumen arsitektur (context.md)...`
       ]);
 
@@ -1173,7 +1225,7 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
         colors: ['#6366f1', '#a5b4fc', '#4f46e5', '#34d399']
       });
 
-      // 2. Call context updater route dynamically
+      // 4. Call context updater route dynamically
       const updateRes = await fetch('/api/csa/update-context', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1189,7 +1241,7 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
         setLogs(prev => [
           ...prev,
           `[CSA Context Updater] Sukses merevisi context.md arsitektur proyek.`,
-          `[System] Penggabungan branch feature/task-${targetTask.id} berhasil diselesaikan.`
+          `[System] Penggabungan branch ${targetTask.branch_name || `feature/task-${targetTask.id}`} berhasil diselesaikan.`
         ]);
         
         // Refresh project state and tasks list
@@ -1201,7 +1253,6 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
       }
 
       setSimStep('merged');
-
       setNotifications(prev => [
         ...prev,
         { 
