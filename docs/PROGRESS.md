@@ -12,7 +12,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
-| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 3 | 60% |
+| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 4 | 80% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
@@ -195,10 +195,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Berjalan dinamis terintegrasi penuh.
 
 #### Task 4.4 — Pull code perubahan dari repository
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat API route `/api/github/pull-changes` yang menggunakan `octokit.request` dengan header accept `vnd.github.v3.diff` untuk mengambil data diff teks mentah antara branch task dengan branch default (main/master).
+- **File berubah:** `src/app/api/github/pull-changes/route.ts`.
+- **Catatan:** Menyediakan mockup diff terstruktur yang bermutu (seperti penambahan package sentry dan try-catch error checks) jika berjalan dalam mode offline development.
+
+#### Task 4.5 — Update status task (In Progress ke Awaiting Review)
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat API route GET/POST `/api/github/pull-changes` yang memicu pemanggilan `octokit.rest.repos.compareCommits` untuk menarik perbedaan kode (git diff) antara branch task (`feature/task-{id}`) dengan branch default (`main` / `master`) untuk dievaluasi oleh CSA.
+- **Rencana Tindakan:** Memperbarui alur verifikasi kode pada dashboard simulator di mana setelah diff kode ditarik sukses, status task di tabel `tasks` database Supabase otomatis di-update dari `in_progress` ke `awaiting_review`.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 4 — Task 4.4: Pull code perubahan dari repository**
+- **Fase 4 — Task 4.5: Update status task (In Progress ke Awaiting Review)**
