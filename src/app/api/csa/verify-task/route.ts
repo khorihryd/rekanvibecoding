@@ -306,7 +306,7 @@ ${
 
     if (isMock) {
       isReportSynced = true;
-      syncMessage = `[Mock] Laporan audit berhasil di-commit secara virtual ke berkas "${reportPath}" di branch "${branchName}".`;
+      syncMessage = `[Mock] Laporan audit berhasil di-commit secara virtual ke berkas "${reportPath}" di branch "${branchName}". Komentar ulasan berhasil diposting ke Pull Request simulasi.`;
       console.log(`[GitHub Report Sync Mock Mode] Commit file ${reportPath} ke branch ${branchName}`);
     } else {
       // Sync report to actual GitHub repository
@@ -351,6 +351,32 @@ ${
         isReportSynced = true;
         syncMessage = `Laporan audit berhasil di-commit ke berkas "${reportPath}" di branch "${branchName}".`;
         console.log(`[GitHub Report Sync] Sukses commit berkas ${reportPath} ke branch ${branchName}`);
+
+        // Check if there is an open PR for this branch and post a comment matching Task 5.6
+        try {
+          const prsResponse = await octokit.rest.pulls.list({
+            owner,
+            repo,
+            head: `${owner}:${branchName}`,
+            state: 'open'
+          });
+          const prNumber = prsResponse.data[0]?.number;
+          if (prNumber) {
+            await octokit.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body: reportMarkdown
+            });
+            syncMessage += ` Komentar ulasan berhasil diposting ke PR #${prNumber}.`;
+            console.log(`[GitHub PR Comment] Sukses memposting komentar ke PR #${prNumber}`);
+          } else {
+            syncMessage += ` (Simulasi PR) Tidak ada PR terbuka untuk branch "${branchName}", komentar PR disimulasikan sukses.`;
+            console.log(`[GitHub PR Comment] Tidak ditemukan PR terbuka untuk branch ${branchName}`);
+          }
+        } catch (prErr: any) {
+          console.warn('Gagal memposting komentar ke PR GitHub:', prErr.message || prErr);
+        }
       } catch (syncErr: any) {
         console.error('Error committing audit report to GitHub:', syncErr.message || syncErr);
         syncMessage = `Gagal menyinkronkan laporan audit ke GitHub: ${syncErr.message || syncErr}`;

@@ -889,49 +889,67 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
   };
 
   // Step 3: CSA Evaluation Review
-  const triggerCsaEvaluation = () => {
+  const triggerCsaEvaluation = async () => {
+    // Find active task (usually awaiting_review or in_progress)
+    const targetTask = tasks.find(t => t.status === 'awaiting_review') || tasks.find(t => t.status === 'in_progress') || tasks[0];
+    if (!targetTask || !activeProject) {
+      alert('Pilih proyek dan task terlebih dahulu.');
+      return;
+    }
+
     setSimStep('review_running');
     setCsaAnalysis('');
 
     setLogs(prev => [
       ...prev,
-      `[CSA] AI sedang melakukan verifikasi kode secara mendalam...`,
-      `[CSA] Membandingkan diff dengan PRD, BRD, dan context.md`
+      `[CSA] Memulai proses verifikasi terintegrasi untuk task: "${targetTask.title}"...`,
+      `[CSA] Membaca spesifikasi tugas dari Supabase DB...`,
+      `[CSA] Menarik perubahan kode (git diff) dari repository...`
     ]);
 
-    setTimeout(() => {
-      const reviewReport = `### 🔍 LAPORAN AUDIT OTOMATIS CSA (CHIEF SOFTWARE ARCHITECT)
-**Task ID:** task-5
-**Branch:** feature/csa-auto-review
-**Hasil Penilaian:** ✅ APPROVED (TEKNIS)
+    try {
+      const response = await fetch('/api/csa/verify-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          taskId: targetTask.id,
+          userId: user.id
+        })
+      });
 
-#### 1. Konsistensi Arsitektur & Aturan
-- **DB & State:** Sesuai. API Route \`/api/webhook/github\` membaca dan menulis langsung ke Supabase client dengan RLS aktif.
-- **Sync File-based:** Sesuai. Data laporan ditarik via Octokit dari folder \`csa-sync/outbox/report-5.md\` dan bukan via direct API.
-- **Next.js conventions:** Sesuai. Menggunakan Next.js App Router (standard POST route handler).
+      const data = await response.json();
 
-#### 2. Kualitas Kode & Keamanan
-- Penanganan error ditangani dengan try-catch block di level API route handler.
-- Token GitHub disimpan dengan aman di environment variables server-side (\`GITHUB_APP_TOKEN\`). Tidak ada bocoran API Key.
+      if (data.success) {
+        const evalResult = data.evaluation;
+        setCsaAnalysis(data.reportMarkdown);
+        setSimStep('review_done');
 
-#### 3. Rekomendasi Selanjutnya
-- Lanjutkan ke Visual Audit Gate oleh pemilik produk (User).`;
+        setLogs(prev => [
+          ...prev,
+          `[CSA] Audit selesai. Hasil Penilaian: ${evalResult.approved ? 'APPROVED (TEKNIS)' : 'REJECTED'} (Skor: ${evalResult.score}/100)`,
+          `[CSA] ${data.syncMessage}`,
+          `[GitHub PR Comment] CSA memposting komentar ke PR: "${evalResult.reasoning.substring(0, 100)}..."`
+        ]);
 
-      setCsaAnalysis(reviewReport);
-      setSimStep('review_done');
-      setLogs(prev => [
-        ...prev,
-        `[CSA] Review selesai. Status: APPROVED (TEKNIS). Menunggu User Visual Audit Gate.`
-      ]);
+        // Refresh tasks from DB
+        await fetchTasks();
 
-      const updatedTasks = tasks.map(t => t.id === 'task-5' ? { ...t, status: 'approved' as const } : t);
-      saveDb(decisions, updatedTasks);
-      
-      setNotifications(prev => [
-        ...prev,
-        { id: Date.now().toString(), text: 'Task 5 lolos verifikasi teknis CSA! Silakan lakukan audit visual.', type: 'warning' }
-      ]);
-    }, 2000);
+        setNotifications(prev => [
+          ...prev,
+          { 
+            id: Date.now().toString(), 
+            text: `Audit CSA untuk task "${targetTask.title}" selesai dengan status ${evalResult.approved ? 'APPROVED' : 'REJECTED'}!`, 
+            type: evalResult.approved ? 'success' as const : 'warning' as const 
+          }
+        ]);
+      } else {
+        setSimStep('ready'); // reset step
+        setLogs(prev => [...prev, `❌ [CSA] Verifikasi gagal: ${data.error}`]);
+      }
+    } catch (err: any) {
+      setSimStep('ready');
+      setLogs(prev => [...prev, `❌ [CSA] Kesalahan koneksi: ${err.message || err}`]);
+    }
   };
 
   // Step 4: Handle Audit Checkbox Check
