@@ -16,6 +16,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (prompt.length > 2000) {
+      return NextResponse.json(
+        { success: false, error: 'Panjang prompt melebihi batas maksimal 2000 karakter.' },
+        { status: 400 }
+      );
+    }
+
     // Retrieve the current context of the project if projectId is supplied
     let projectContext = '';
     if (projectId) {

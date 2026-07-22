@@ -16,7 +16,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 4 | 100% |
 | **Fase 7** | Audit Gate & Merge | 4 | 4 | 100% |
-| **Fase 8** | Hardening & Monitoring | 4 | 1 | 25% |
+| **Fase 8** | Hardening & Monitoring | 4 | 2 | 50% |
 
 ---
 
@@ -98,7 +98,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 2.1 — Koneksi GitHub OAuth/App
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` dan callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya ke dropdown pilihan repositori di modal pembuatan proyek baru.
+- **Ringkasan:** Menyusun skema tabel `github_tokens` dan kebijakan RLS-nya. Membuat route OAuth untuk inisiasi `/api/auth/github/login` dan callback handler `/api/auth/github/callback` untuk pertukaran code ke access token. Menyediakan endpoint `/api/github/repos` dengan fallback mockup dan mengintegrasikannya to dropdown pilihan repositori di modal pembuatan proyek baru.
 - **File berubah:** `supabase/migrations/20260721094400_create_github_tokens.sql`, `src/lib/supabaseServer.ts`, `src/app/api/auth/github/login/route.ts`, `src/app/api/auth/github/callback/route.ts`, `src/app/api/github/repos/route.ts`, `src/app/dashboard/page.tsx`, `.env.example`.
 - **Catatan:** Fallback mockup otomatis digunakan apabila client credentials belum siap di `.env.local` untuk mempermudah development lokal.
 
@@ -204,7 +204,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 4.5 — Update status task (In Progress ke Awaiting Review)
 - **Status:** Selesai
 - **Tanggal:** 2026-07-22
-- **Ringkasan:** Menyisipkan logika trigger `/api/github/pull-changes` and update status database ke `awaiting_review` pada dashboard simulator `triggerCiTests` saat uji CI/CD berhasil lolos. Status task berhasil berpindah dari `in_progress` ke `awaiting_review` di database Supabase dan memindahkan visual kartu di Kanban Board.
+- **Ringkasan:** Menyisipkan logika trigger `/api/github/pull-changes` dan update status database ke `awaiting_review` pada dashboard simulator `triggerCiTests` saat uji CI/CD berhasil lolos. Status task berhasil berpindah dari `in_progress` ke `awaiting_review` di database Supabase dan memindahkan visual kartu di Kanban Board.
 - **File berubah:** `src/app/dashboard/page.tsx`.
 - **Catatan:** Alur integrasi teruji lengkap.
 
@@ -328,10 +328,16 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **File berubah:** `src/app/dashboard/page.tsx`, `src/app/api/csa/verify-task/route.ts`, dll.
 
 #### Task 8.2 — Rate limiting & validasi input
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Menerapkan verifikasi panjang karakter (minimal 3, maksimal 50) dan validasi format regex URL repositori GitHub pada form pembuatan proyek baru. Menambahkan throttle client-side untuk mencegah spam pengiriman pesan saat model AI sedang memproses respons chat, serta memberlakukan validasi prompt server-side (maksimal 2000 karakter) di route `/api/csa/brainstorm`.
+- **File berubah:** `src/app/dashboard/page.tsx`, `src/app/api/csa/brainstorm/route.ts`.
+
+#### Task 8.3 — Review keamanan RLS & credential
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Mengimplementasikan validasi input di form pembuatan proyek (panjang nama minimal, validasi format URL repository) dan memverifikasi batas rate-limiting sederhana untuk mencegah penyalahgunaan API endpoint AI.
+- **Rencana Tindakan:** Melakukan review menyeluruh terhadap konfigurasi database RLS untuk tabel `projects`, `decisions`, `tasks`, dan `project_state` guna memastikan data user terisolasi penuh dan aman dari kebocoran credential GitHub.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 8 — Task 8.2: Rate limiting & validasi input**
+- **Fase 8 — Task 8.3: Review keamanan RLS & credential**

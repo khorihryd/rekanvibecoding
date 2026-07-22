@@ -320,7 +320,22 @@ export default function Home() {
 
   const handleGenerateTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskTitle.trim() || !activeProject) return;
+    if (!activeProject) return;
+
+    if (!newTaskTitle.trim()) {
+      alert('Judul task tidak boleh kosong.');
+      return;
+    }
+
+    if (newTaskTitle.trim().length < 5) {
+      alert('Judul task minimal 5 karakter agar CSA dapat menganalisis dengan baik.');
+      return;
+    }
+
+    if (newTaskTitle.trim().length > 80) {
+      alert('Judul task terlalu panjang. Batasi maksimal 80 karakter.');
+      return;
+    }
 
     try {
       setGeneratingTask(true);
@@ -400,7 +415,30 @@ export default function Home() {
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProjectName.trim() || !user) return;
+    if (!user) return;
+
+    if (!newProjectName.trim()) {
+      alert('Nama proyek tidak boleh kosong.');
+      return;
+    }
+
+    if (newProjectName.trim().length < 3) {
+      alert('Nama proyek minimal harus terdiri dari 3 karakter.');
+      return;
+    }
+
+    if (newProjectName.trim().length > 50) {
+      alert('Nama proyek maksimal 50 karakter.');
+      return;
+    }
+
+    if (newRepoUrl.trim()) {
+      const githubUrlRegex = /^(https:\/\/github\.com\/)?[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$/;
+      if (!githubUrlRegex.test(newRepoUrl.trim())) {
+        alert('Format URL Repositori GitHub tidak valid. Gunakan format owner/repo atau URL GitHub lengkap.');
+        return;
+      }
+    }
 
     try {
       const { data, error } = await supabase
@@ -781,6 +819,16 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
+
+    if (isTyping) {
+      alert('Mohon tunggu respons dari CSA selesai sebelum mengirim pesan baru.');
+      return;
+    }
+
+    if (chatInput.trim().length > 1000) {
+      alert('Pesan Anda terlalu panjang. Batasi maksimal 1000 karakter.');
+      return;
+    }
 
     const userMsg: Message = {
       id: `msg-u-${Date.now()}`,
