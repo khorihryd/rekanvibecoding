@@ -14,7 +14,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
-| **Fase 6** | Dashboard & Status Tracking | 4 | 3 | 75% |
+| **Fase 6** | Dashboard & Status Tracking | 4 | 4 | 100% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
 
@@ -280,10 +280,21 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Semua teks hardcoded spec PRD & BRD telah digantikan dengan integrasi DB.
 
 #### Task 6.4 — Log keputusan arsitektur (decisions)
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Memastikan visualisasi tabel Log Keputusan Arsitektur (`decisions` table) di bagian bawah tab Specifications memuat riwayat rekaman data secara dinamis dari database Supabase, terurut descending berdasarkan waktu pembuatan, dan ter-update secara reaktif melalui realtime subscription.
+- **File berubah:** `src/app/dashboard/page.tsx`.
+- **Catatan:** Baris log data menyajikan ID keputusan, deskripsi teknis, justifikasi reasoning, serta timestamp sinkronisasi.
+
+---
+
+### Fase 7 — Audit Gate & Merge
+
+#### Task 7.1 — Dashboard verifikasi parameter keamanan
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Memastikan tabel log keputusan arsitektur terdaftar di tab Specifications dimuat secara tertib dari database Supabase (tabel `decisions`) dan sinkron saat keputusan baru disimpan. (Sudah terimplementasi di kode, tinggal verifikasi dan log progress!).
+- **Rencana Tindakan:** Menyempurnakan tab visual Verify / Audit Gate agar memuat indikator status kelayakan, parameter checklist keamanan (keberadaan penanganan error, kepatuhan RLS, dll) yang dievaluasi secara dinamis dari log audit laporan CSA.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 6 — Task 6.4: Log keputusan arsitektur (decisions)**
+- **Fase 7 — Task 7.1: Dashboard verifikasi parameter keamanan**
