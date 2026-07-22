@@ -1773,7 +1773,7 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                           <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
                           <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
                             <span className="font-mono">{t.id}</span>
-                            <span className="font-mono text-amber-400 font-medium">Verify</span>
+                            <span className="text-[8px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1 py-0.2 rounded font-bold uppercase flex items-center gap-0.5"><Clock size={8} /> verify</span>
                           </div>
                         </div>
                       ))}
@@ -1805,8 +1805,8 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                           <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
                           <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
                             <span className="font-mono">{t.id}</span>
-                            <span className="text-emerald-400 font-mono font-medium flex items-center gap-0.5">
-                              <Check size={9} /> approved
+                            <span className="text-[8px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.2 rounded font-bold uppercase flex items-center gap-0.5">
+                              <Check size={8} /> passed
                             </span>
                           </div>
                         </div>
@@ -1839,8 +1839,8 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                           <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
                           <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
                             <span className="font-mono">{t.id}</span>
-                            <span className="text-rose-400 font-mono font-medium flex items-center gap-0.5">
-                              <X size={9} /> rejected
+                            <span className="text-[8px] font-mono bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.2 rounded font-bold uppercase flex items-center gap-0.5">
+                              <X size={8} /> rejected
                             </span>
                           </div>
                         </div>
@@ -2037,9 +2037,47 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                   {/* Status Indicator */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-xs text-slate-400 font-semibold">Status:</span>
-                    <span className="text-xs uppercase font-mono font-bold px-2 py-1 rounded bg-[#0f1322] border border-indigo-950/60">
-                      {selectedTask ? selectedTask.status : simStep}
-                    </span>
+                    {(() => {
+                      const status = selectedTask ? selectedTask.status : simStep;
+                      switch (status) {
+                        case 'approved':
+                          return (
+                            <span className="text-[10px] uppercase font-mono font-bold px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center gap-1">
+                              <Check size={12} /> TECHNICAL PASSED
+                            </span>
+                          );
+                        case 'rejected':
+                          return (
+                            <span className="text-[10px] uppercase font-mono font-bold px-2 py-1 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center gap-1">
+                              <X size={12} /> TECHNICAL REJECTED
+                            </span>
+                          );
+                        case 'awaiting_review':
+                          return (
+                            <span className="text-[10px] uppercase font-mono font-bold px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center gap-1 animate-pulse">
+                              <Clock size={12} /> AWAITING REVIEW
+                            </span>
+                          );
+                        case 'in_progress':
+                          return (
+                            <span className="text-[10px] uppercase font-mono font-bold px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center gap-1 animate-pulse">
+                              <RefreshCw size={12} className="animate-spin" /> IN PROGRESS
+                            </span>
+                          );
+                        case 'merged':
+                          return (
+                            <span className="text-[10px] uppercase font-mono font-bold px-2 py-1 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center gap-1">
+                              <CheckCircle2 size={12} /> MERGED TO MAIN
+                            </span>
+                          );
+                        default:
+                          return (
+                            <span className="text-[10px] uppercase font-mono font-bold px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400">
+                              {status}
+                            </span>
+                          );
+                      }
+                    })()}
                   </div>
                 </div>
 

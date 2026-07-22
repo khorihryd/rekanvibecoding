@@ -15,7 +15,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 4 | 100% |
-| **Fase 7** | Audit Gate & Merge | 4 | 1 | 25% |
+| **Fase 7** | Audit Gate & Merge | 4 | 2 | 50% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
 
 ---
@@ -50,7 +50,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Tanggal:** 2026-07-21
 - **Ringkasan:** Menginstal `@sentry/nextjs`, mengonfigurasi SDK untuk client, server, dan edge, serta menambahkan endpoint test `/api/test-sentry` untuk memicu exception secara sengaja dan menangkapnya di Sentry.
 - **File berubah:** `package.json`, `package-lock.json`, `next.config.ts`, `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `src/app/api/test-sentry/route.ts`.
-- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` and menggunakan native system font stack.
+- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` dan menggunakan native system font stack.
 
 ---
 
@@ -298,10 +298,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Checklist memvalidasi status secara visual dengan indikator hijau/merah yang premium.
 
 #### Task 7.2 — Indikator kelulusan evaluasi visual (badge)
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Mendesain ulang visualisasi status badge di header panel verifikasi dan Kanban board cards agar menampilkan status lencana kelulusan "TECHNICAL PASSED" (emerald check) atau "TECHNICAL REJECTED" (rose cross) secara estetis dan profesional berdasarkan data realtime database Supabase.
+- **File berubah:** `src/app/dashboard/page.tsx`.
+- **Catatan:** Memperkuat penyampaian informasi audit visual secara konsisten di seluruh bagian dashboard.
+
+#### Task 7.3 — Aksi manual "Approve & Merge"
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Mempercantik visual status badge di header panel verifikasi dan Kanban board agar dengan jelas dan estetis menampilkan lencana kelulusan "TECHNICAL PASSED" (hijau) atau penolakan "TECHNICAL REJECTED" (merah) sesuai state di database.
+- **Rencana Tindakan:** Memodifikasi tombol "Approve & Merge ke Main" agar aktif jika checklist user tercentang penuh dan status task adalah `approved` (Technical Passed). Ketika diklik, status task diupdate ke `merged` di database Supabase dan memicu integrasi route update context arsitektur.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 7 — Task 7.2: Indikator kelulusan evaluasi visual (badge)**
+- **Fase 7 — Task 7.3: Aksi manual "Approve & Merge"**
