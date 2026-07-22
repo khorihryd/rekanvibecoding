@@ -596,6 +596,7 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
   const [ciLogs, setCiLogs] = useState<string[]>([]);
   const [csaAnalysis, setCsaAnalysis] = useState<string>('');
   const [csaEvaluation, setCsaEvaluation] = useState<any>(null);
+  const [taskDiff, setTaskDiff] = useState<string>('');
   const [auditItems, setAuditItems] = useState<AuditItem[]>([]);
   const [envSecrets, setEnvSecrets] = useState<string>('');
   const [simWebhookPayload, setSimWebhookPayload] = useState<string>('');
@@ -943,6 +944,7 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
             .then(async (pullData) => {
               if (pullData.success) {
                 setLogs(prev => [...prev, `[GitHub Pull] Sukses menarik diff perubahan. Karakter diff: ${pullData.diffText?.length || 0}`]);
+                setTaskDiff(pullData.diffText || '');
                 
                 // Update status from in_progress to awaiting_review in database
                 try {
@@ -1056,40 +1058,94 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
   };
 
   // Step 5: Merge branch to main
-  const handleMergeToMain = () => {
-    if (simStep !== 'audit') return;
+  const handleMergeToMain = async () => {
+    const targetTask = selectedTask || tasks.find(t => t.status === 'approved') || tasks[0];
+    if (!targetTask || !activeProject) {
+      alert('Pilih task terlebih dahulu.');
+      return;
+    }
+
+    const allChecked = auditItems.every(item => item.checked);
+    if (!allChecked) {
+      alert('Harap selesaikan seluruh visual checklist audit terlebih dahulu.');
+      return;
+    }
 
     setLogs(prev => [
       ...prev,
-      `[Merge Gate] Memulai penggabungan kode (merge) feature/csa-auto-review ke main`,
-      `[Octokit] Memanggil API GitHub: merge branch...`,
-      `[Octokit] Branch feature/csa-auto-review sukses di-merge ke main`
+      `[Merge Gate] Memulai penggabungan kode (merge) untuk task: "${targetTask.title}"`,
+      `[Database] Memperbarui status task menjadi "merged" di database Supabase...`
     ]);
 
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#6366f1', '#a5b4fc', '#4f46e5', '#34d399']
-    });
+    try {
+      // 1. Update task status in Supabase database to 'merged'
+      const { error: dbUpdateError } = await supabase
+        .from('tasks')
+        .update({
+          status: 'merged',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', targetTask.id);
 
-    const updatedTasks = tasks.map(t => {
-      if (t.id === 'task-5') return { ...t, status: 'merged' as const, updated_at: new Date().toISOString() };
-      if (t.id === 'task-6') return { ...t, status: 'inbox' as const }; // move next task to inbox
-      return t;
-    });
+      if (dbUpdateError) throw dbUpdateError;
 
-    // Update Project State dynamically
-    const newContext = `${projectState.context_markdown}\n- Ditambahkan API webhook GitHub dan modul review otomatis CSA (Task 5)`;
-    setProjectState({ context_markdown: newContext });
+      setLogs(prev => [
+        ...prev,
+        `[Database] Status task sukses diperbarui ke "merged".`,
+        `[Octokit] Memanggil API GitHub: merge branch... (mocked in offline mode)`,
+        `[CSA Context Updater] Memicu pembaruan dokumen arsitektur (context.md)...`
+      ]);
 
-    saveDb(decisions, updatedTasks);
-    setSimStep('merged');
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#6366f1', '#a5b4fc', '#4f46e5', '#34d399']
+      });
 
-    setNotifications(prev => [
-      ...prev,
-      { id: Date.now().toString(), text: 'Task 5 sukses di-merge ke main! CSA memperbarui context.md.', type: 'success' }
-    ]);
+      // 2. Call context updater route dynamically
+      const updateRes = await fetch('/api/csa/update-context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: activeProject.id,
+          userId: user.id,
+          diffText: taskDiff || 'Pembaruan arsitektur umum untuk task: ' + targetTask.title
+        })
+      });
+
+      const updateData = await updateRes.json();
+      if (updateData.success) {
+        setLogs(prev => [
+          ...prev,
+          `[CSA Context Updater] Sukses merevisi context.md arsitektur proyek.`,
+          `[System] Penggabungan branch feature/task-${targetTask.id} berhasil diselesaikan.`
+        ]);
+        
+        // Refresh project state and tasks list
+        await fetchProjectState();
+        await fetchTasks();
+        setSelectedTask(null); // clear selection
+      } else {
+        setLogs(prev => [...prev, `⚠️ [CSA Context Updater] Gagal memperbarui context.md: ${updateData.error}`]);
+      }
+
+      setSimStep('merged');
+
+      setNotifications(prev => [
+        ...prev,
+        { 
+          id: Date.now().toString(), 
+          text: `Task "${targetTask.title}" sukses di-merge ke main! CSA memperbarui context.md.`, 
+          type: 'success' as const
+        }
+      ]);
+
+    } catch (err: any) {
+      console.error('Error merging task:', err);
+      setLogs(prev => [...prev, `❌ [Merge Gate] Kesalahan saat memproses penggabungan: ${err.message || err}`]);
+      alert('Gagal melakukan merge: ' + err.message);
+    }
   };
 
   // Reset Simulator
@@ -2288,15 +2344,18 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                     </div>
 
                     <div className="p-3 border-t border-indigo-950/40 bg-indigo-950/10">
-                      {simStep === 'merged' ? (
-                        <div className="w-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold py-2 rounded text-center flex items-center justify-center gap-1.5">
+                      {selectedTask?.status === 'merged' || simStep === 'merged' ? (
+                        <div className="w-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold py-2 rounded text-center flex items-center justify-center gap-1.5 font-mono uppercase">
                           <CheckCircle2 size={14} />
                           <span>SUKSES DI-MERGE KE MAIN</span>
                         </div>
                       ) : (
                         <button
                           onClick={handleMergeToMain}
-                          disabled={simStep !== 'audit'}
+                          disabled={
+                            !(selectedTask?.status === 'approved' && auditItems.every(item => item.checked)) && 
+                            simStep !== 'audit'
+                          }
                           className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800/40 disabled:text-slate-500 text-white text-xs font-semibold py-2 rounded transition-colors flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/20"
                         >
                           <GitPullRequest size={14} />
