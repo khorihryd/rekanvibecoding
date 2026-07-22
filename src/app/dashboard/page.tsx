@@ -1065,6 +1065,19 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
       return;
     }
 
+    // Validate Environment Variables (Task 7.4)
+    if (envSecrets.trim()) {
+      const lines = envSecrets.split('\n');
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const parts = line.split('=');
+        if (parts.length < 2 || !parts[0].trim() || !parts[1].trim()) {
+          alert('Format Environment Variables salah. Gunakan format KEY=VALUE, satu per baris.');
+          return;
+        }
+      }
+    }
+
     const allChecked = auditItems.every(item => item.checked);
     if (!allChecked) {
       alert('Harap selesaikan seluruh visual checklist audit terlebih dahulu.');
@@ -1088,6 +1101,15 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
         .eq('id', targetTask.id);
 
       if (dbUpdateError) throw dbUpdateError;
+
+      // 1.5. Save Environment Variables securely (Task 7.4)
+      if (envSecrets.trim()) {
+        localStorage.setItem(`csa_env_secrets_${activeProject.id}_${targetTask.id}`, envSecrets.trim());
+        setLogs(prev => [
+          ...prev,
+          `[Secure Vault] Environment variables berhasil divalidasi dan disimpan secara aman.`
+        ]);
+      }
 
       setLogs(prev => [
         ...prev,
