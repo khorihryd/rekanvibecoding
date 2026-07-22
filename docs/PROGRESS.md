@@ -13,7 +13,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
-| **Fase 5** | Mesin Verifikasi | 6 | 2 | 33% |
+| **Fase 5** | Mesin Verifikasi | 6 | 3 | 50% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
@@ -50,7 +50,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Tanggal:** 2026-07-21
 - **Ringkasan:** Menginstal `@sentry/nextjs`, mengonfigurasi SDK untuk client, server, dan edge, serta menambahkan endpoint test `/api/test-sentry` untuk memicu exception secara sengaja dan menangkapnya di Sentry.
 - **File berubah:** `package.json`, `package-lock.json`, `next.config.ts`, `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `src/app/api/test-sentry/route.ts`.
-- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` dan menggunakan native system font stack.
+- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` and menggunakan native system font stack.
 
 ---
 
@@ -130,7 +130,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 #### Task 3.1 — Setup engine LLM & API client
 - **Status:** Selesai
 - **Tanggal:** 2026-07-21
-- **Ringkasan:** Menginstal library inti Vercel AI SDK `ai` beserta provider `@ai-sdk/google` dan `@ai-sdk/openai`. Menyusun helper function `generateTextContent` di `src/lib/ai.ts` untuk memfasilitasi pemanggilan LLM dinamis dengan parameter temperature & system prompt, lengkap dengan mode mockup fallback jika API keys belum tersedia di `.env.local` untuk mempermudah development lokal. Membuat route test `/api/test-ai` untuk verifikasi.
+- **Ringkasan:** Menginstal library inti Vercel AI SDK `ai` beserta provider `@ai-sdk/google` and `@ai-sdk/openai`. Menyusun helper function `generateTextContent` di `src/lib/ai.ts` untuk memfasilitasi pemanggilan LLM dinamis dengan parameter temperature & system prompt, lengkap dengan mode mockup fallback jika API keys belum tersedia di `.env.local` untuk mempermudah development lokal. Membuat route test `/api/test-ai` untuk verifikasi.
 - **File berubah:** `package.json`, `package-lock.json`, `src/lib/ai.ts`, `src/app/api/test-ai/route.ts`, `.env.example`.
 - **Catatan:** Mode mockup otomatis menghasilkan dokumen arsitektur dan spesifikasi tugas berkualitas tinggi untuk meniru output AI yang sesungguhnya.
 
@@ -227,10 +227,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Catatan:** Output audit dirancang menghasilkan JSON terstruktur (approved, score, reasoning, feedback).
 
 #### Task 5.3 — Evaluasi aturan khusus & penolakan keras
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Menyisipkan layer **Static Audit Pre-check** programmatik di `/api/csa/verify-task` sebelum LLM dihubungi. Pre-check ini mendeteksi bypass RLS Supabase (kunci `service_role`) atau ketiadaan try-catch/Sentry pada file typescript logika secara statis dan menolaknya langsung dengan status approved: false dan skor rendah.
+- **File berubah:** `src/app/api/csa/verify-task/route.ts`.
+- **Catatan:** Pengujian statis berjalan aman di baris kode server, memperkuat keamanan sebelum LLM dievaluasi.
+
+#### Task 5.4 — Laporan audit kualitas kode otomatis
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Mengembangkan dan merinci aturan penolakan keras (seperti bypass RLS Supabase dan ketiadaan error tracking) secara eksplisit di dalam evaluasi LLM `/api/csa/verify-task` dan menguji respon penolakannya secara lokal.
+- **Rencana Tindakan:** Membuat API route POST `/api/github/sync-report` (atau mengintegrasikannya langsung pada akhir `/api/csa/verify-task`!) untuk mengambil hasil evaluasi (approved, score, reasoning, feedback) dan mengkompilasinya menjadi dokumen laporan audit markdown (`csa-sync/outbox/report-{id}.md`), lalu melakukan commit berkas report tersebut secara otomatis kembali ke branch tugas `feature/task-{id}`.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 5 — Task 5.3: Evaluasi aturan khusus & penolakan keras**
+- **Fase 5 — Task 5.4: Laporan audit kualitas kode otomatis**

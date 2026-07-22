@@ -152,6 +152,55 @@ index 8b9c7d2..6f5e4d2 100644
       }
     }
 
+    // Static Audit Pre-checks (Hard rejection rules: RLS bypass & missing error handling)
+    const lowerDiff = diffText.toLowerCase();
+    const hasRlsBypass = lowerDiff.includes('service_role') || lowerDiff.includes('bypass_rls') || lowerDiff.includes('supabase_service_key');
+    
+    // We expect JS/TS files to have error handling (try/catch) and sentry integrations if they are modified
+    const hasErrorHandling = lowerDiff.includes('try') || lowerDiff.includes('catch') || lowerDiff.includes('sentry');
+
+    if (hasRlsBypass) {
+      const evaluationData = {
+        approved: false,
+        score: 30,
+        reasoning: '[Audit Penolakan Keras Static Check] Kode ditolak otomatis karena terdeteksi potensi celah keamanan RLS bypass atau pemanggilan service role key dari client-side UI.',
+        feedback: [
+          'Dilarang memanggil service_role client dari sisi UI frontend.',
+          'Semua endpoint/operasi database harus mematuhi Supabase Row Level Security (RLS) user session.'
+        ]
+      };
+      return NextResponse.json({
+        success: true,
+        isMock,
+        taskId: task.id,
+        taskTitle: task.title,
+        branchName,
+        evaluation: evaluationData,
+        message: 'CSA Verifier Controller memicu penolakan keras (Hard Rejection) secara statis untuk pelanggaran RLS bypass.'
+      });
+    }
+
+    if (!hasErrorHandling) {
+      const evaluationData = {
+        approved: false,
+        score: 55,
+        reasoning: '[Audit Penolakan Keras Static Check] Kode ditolak otomatis karena tidak menyertakan penanganan error (try/catch) atau integrasi Sentry pada berkas logika yang diubah.',
+        feedback: [
+          'Seluruh pemanggilan API luar, endpoint server, dan query database wajib dibungkus try/catch block.',
+          'Tangkap exception dan pastikan dikirim ke Sentry untuk penelusuran error.'
+        ]
+      };
+      return NextResponse.json({
+        success: true,
+        isMock,
+        taskId: task.id,
+        taskTitle: task.title,
+        branchName,
+        evaluation: evaluationData,
+        message: 'CSA Verifier Controller memicu penolakan keras (Hard Rejection) secara statis untuk ketiadaan penanganan error.'
+      });
+    }
+
     // Return success indicating both inputs were successfully loaded and evaluated
     console.log(`[CSA Verification Controller] Berhasil memuat spesifikasi tugas (${specMarkdown.length} karakter) dan diff perubahan (${diffText.length} karakter). Ready for evaluation.`);
 
