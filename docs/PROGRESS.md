@@ -367,5 +367,14 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 
 ---
 
+### Koreksi 3 — Push AGENTS.md Sungguhan ke Repository User
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat API route baru `/api/github/push-agents` yang secara dinamis membaca konten `AGENTS.md` dari filesystem server dan mengunggahnya ke root repositori default branch pengguna via GitHub API. Menghapus notifikasi mockup awal pada halaman dashboard dan mengubahnya menjadi penambahan dinamis hanya jika berkas berhasil di-push secara sukses.
+- **File berubah:** `src/app/api/github/push-agents/route.ts`, `src/app/dashboard/page.tsx`
+- **Catatan untuk manusia:** Fitur ini menjamin bahwa `AGENTS.md` otomatis terunggah secara nyata ke repositori pengguna sesaat setelah pembuatan proyek selesai diproses.
+
+---
+
 ## Task Berikutnya yang Akan Dikerjakan
-- **Koreksi 3 — Push AGENTS.md Sungguhan ke Repository User**
+- **Koreksi 4 — Sinkronkan Dokumen Repo dengan Versi Terbaru**

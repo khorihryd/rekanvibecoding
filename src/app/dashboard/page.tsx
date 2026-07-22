@@ -131,8 +131,7 @@ export default function Home() {
   const [logs, setLogs] = useState<string[]>([]);
   const [activeFile, setActiveFile] = useState<string>('csa-sync/context.md');
   const [notifications, setNotifications] = useState<Array<{ id: string; text: string; type: 'info' | 'warning' | 'success' }>>([
-    { id: '1', text: 'CSA diinisialisasi untuk project rekanvibecoding', type: 'success' },
-    { id: '2', text: 'File AGENTS.md berhasil dibuat di root repository', type: 'info' }
+    { id: '1', text: 'CSA diinisialisasi untuk project rekanvibecoding', type: 'success' }
   ]);
 
   // Projects & Database State
@@ -474,6 +473,30 @@ export default function Home() {
         } catch (webhookErr: any) {
           console.error('Error calling register webhook endpoint:', webhookErr);
           setLogs(prev => [...prev, `[System] Gagal daftar webhook: ${webhookErr.message || webhookErr}`]);
+        }
+      }
+
+      // Push AGENTS.md to root of user repository if repo url is provided (Koreksi 3)
+      if (newRepoUrl) {
+        try {
+          const agentsRes = await fetch('/api/github/push-agents', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.id, repoUrl: newRepoUrl })
+          });
+          const agentsData = await agentsRes.json();
+          if (agentsData.success) {
+            setLogs(prev => [...prev, `[System] ${agentsData.message}`]);
+            setNotifications(prev => [
+              ...prev,
+              { id: Date.now().toString(), text: 'File AGENTS.md berhasil dibuat di root repository.', type: 'info' }
+            ]);
+          } else {
+            setLogs(prev => [...prev, `[System] Gagal membuat AGENTS.md: ${agentsData.error}`]);
+          }
+        } catch (agentsErr: any) {
+          console.error('Error calling push agents endpoint:', agentsErr);
+          setLogs(prev => [...prev, `[System] Gagal membuat AGENTS.md: ${agentsErr.message || agentsErr}`]);
         }
       }
 
