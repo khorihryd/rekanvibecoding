@@ -319,6 +319,35 @@ export default function Home() {
         setIsCreateTaskModalOpen(false);
         setNewTaskTitle('');
         setLogs(prev => [...prev, `[System] Task "${data.task.title}" berhasil didekomposisi oleh CSA (Status: Draft).`]);
+        
+        // Synchronize task specification to GitHub repository if URL exists
+        if (activeProject.github_repo_url) {
+          setLogs(prev => [...prev, `[GitHub Sync] Menyinkronkan spesifikasi task ke branch "${data.task.branch_name}"...`]);
+          try {
+            const syncRes = await fetch('/api/github/sync-task', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: user.id,
+                projectId: activeProject.id,
+                taskId: data.task.id,
+                repoUrl: activeProject.github_repo_url,
+                branchName: data.task.branch_name,
+                specMarkdown: data.task.spec_markdown
+              })
+            });
+            const syncData = await syncRes.json();
+            if (syncData.success) {
+              setLogs(prev => [...prev, `[GitHub Sync] ${syncData.message}`]);
+            } else {
+              setLogs(prev => [...prev, `[GitHub Sync] Gagal menyinkronkan: ${syncData.error}`]);
+            }
+          } catch (syncErr: any) {
+            console.error('Error syncing task spec:', syncErr);
+            setLogs(prev => [...prev, `[GitHub Sync] Gagal: ${syncErr.message || syncErr}`]);
+          }
+        }
+
         setNotifications(prev => [
           ...prev,
           { id: Date.now().toString(), text: `Task baru dibuat: ${data.task.title}`, type: 'success' }

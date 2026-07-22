@@ -12,7 +12,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 1** | Auth & Struktur Database | 5 | 5 | 100% |
 | **Fase 2** | Integrasi GitHub | 4 | 4 | 100% |
 | **Fase 3** | Otak CSA (AI Layer) | 6 | 6 | 100% |
-| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 0 | 0% |
+| **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 1 | 20% |
 | **Fase 5** | Mesin Verifikasi | 6 | 0 | 0% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 0 | 0% |
 | **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
@@ -146,7 +146,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Tanggal:** 2026-07-21
 - **Ringkasan:** Membuat API route `/api/csa/brainstorm` yang menyematkan status arsitektur proyek terbaru dari tabel `project_state` ke LLM query. Memperbarui dashboard UI chat input agar langsung memanggil endpoint ini. Menambahkan tombol "Simpan Keputusan" di UI Chat untuk menyimpan langsung analisis CSA ke tabel `decisions` database Supabase, dan mengaktifkan automasi seeding keputusan awal saat proyek baru dibuat.
 - **File berubah:** `src/app/api/csa/brainstorm/route.ts`, `src/app/dashboard/page.tsx`.
-- **Catatan:** Integrasi decisions terhubung langsung to state rendering database di dashboard.
+- **Catatan:** Integrasi decisions terhubung langsung ke state rendering database di dashboard.
 
 #### Task 3.4 — Endpoint dekomposisi task
 - **Status:** Selesai
@@ -174,10 +174,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 ### Fase 4 — Task Gen & Sinkronisasi Repo
 
 #### Task 4.1 — Sync spesifikasi task ke repository
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Membuat API route `/api/github/sync-task` yang menggunakan Octokit untuk memverifikasi/membuat branch `feature/task-{id}` dan meng-commit berkas markdown spesifikasi tugas `csa-sync/inbox/task-{id}.md`. Menghubungkan fungsi `handleGenerateTask` di dashboard agar otomatis melakukan trigger sinkronisasi ini.
+- **File berubah:** `src/app/api/github/sync-task/route.ts`, `src/app/dashboard/page.tsx`.
+- **Catatan:** Mendukung mock commit virtual jika token OAuth pengguna belum siap secara lokal.
+
+#### Task 4.2 — Update status task (Draft ke Inbox)
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Membuat API route POST `/api/github/sync-task` untuk membuat branch baru `feature/task-{id}` pada repositori GitHub pengguna menggunakan Octokit, lalu melakukan commit berkas spesifikasi `csa-sync/inbox/task-{id}.md` di branch tersebut (atau ditiru jika token offline/dev).
+- **Rencana Tindakan:** Memperbarui backend flow pembuat task atau dashboard UI sehingga saat API sync-task sukses dijalankan, status task di tabel `tasks` database Supabase otomatis di-update dari `draft` menjadi `inbox`.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 4 — Task 4.1: Sync spesifikasi task ke repository**
+- **Fase 4 — Task 4.2: Update status task (Draft ke Inbox)**
