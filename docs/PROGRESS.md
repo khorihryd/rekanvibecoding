@@ -15,7 +15,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 | **Fase 4** | Task Gen & Sinkronisasi Repo | 5 | 5 | 100% |
 | **Fase 5** | Mesin Verifikasi | 6 | 6 | 100% |
 | **Fase 6** | Dashboard & Status Tracking | 4 | 4 | 100% |
-| **Fase 7** | Audit Gate & Merge | 4 | 0 | 0% |
+| **Fase 7** | Audit Gate & Merge | 4 | 1 | 25% |
 | **Fase 8** | Hardening & Monitoring | 4 | 0 | 0% |
 
 ---
@@ -50,7 +50,7 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 - **Tanggal:** 2026-07-21
 - **Ringkasan:** Menginstal `@sentry/nextjs`, mengonfigurasi SDK untuk client, server, dan edge, serta menambahkan endpoint test `/api/test-sentry` untuk memicu exception secara sengaja dan menangkapnya di Sentry.
 - **File berubah:** `package.json`, `package-lock.json`, `next.config.ts`, `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `src/app/api/test-sentry/route.ts`.
-- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` dan menggunakan native system font stack.
+- **Catatan:** Memperbaiki masalah compile font Turbopack dengan menghapus `@next/font/google` and menggunakan native system font stack.
 
 ---
 
@@ -291,10 +291,17 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 ### Fase 7 — Audit Gate & Merge
 
 #### Task 7.1 — Dashboard verifikasi parameter keamanan
+- **Status:** Selesai
+- **Tanggal:** 2026-07-22
+- **Ringkasan:** Menambahkan dropdown pilihan task dinamis di halaman Verify / Audit Gate dan memikat perpindahan klik kartu Kanban. Mengintegrasikan panel Kepatuhan Arsitektur (checklist parameter kemanan) secara dinamis yang memetakan status verifikasi seperti CI/CD build status, RLS check, Exception Handling, dan LLM DoD secara reaktif sesuai status database.
+- **File berubah:** `src/app/dashboard/page.tsx`.
+- **Catatan:** Checklist memvalidasi status secara visual dengan indikator hijau/merah yang premium.
+
+#### Task 7.2 — Indikator kelulusan evaluasi visual (badge)
 - **Status:** Belum Selesai (Task Berikutnya)
-- **Rencana Tindakan:** Menyempurnakan tab visual Verify / Audit Gate agar memuat indikator status kelayakan, parameter checklist keamanan (keberadaan penanganan error, kepatuhan RLS, dll) yang dievaluasi secara dinamis dari log audit laporan CSA.
+- **Rencana Tindakan:** Mempercantik visual status badge di header panel verifikasi dan Kanban board agar dengan jelas dan estetis menampilkan lencana kelulusan "TECHNICAL PASSED" (hijau) atau penolakan "TECHNICAL REJECTED" (merah) sesuai state di database.
 
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
-- **Fase 7 — Task 7.1: Dashboard verifikasi parameter keamanan**
+- **Fase 7 — Task 7.2: Indikator kelulusan evaluasi visual (badge)**

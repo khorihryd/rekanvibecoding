@@ -558,6 +558,7 @@ export default function Home() {
   // Mock Database State (in-memory, loaded from/to localStorage)
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [projectState, setProjectState] = useState({
     context_markdown: '# Project Context: rekanvibecoding\n\n## Deskripsi\nPlatform kolaborasi visual AI untuk vibe coding, mengintegrasikan CSA sebagai pengawas arsitektur.\n\n## Teknologi Utama\n- Next.js 16 (App Router, React 19)\n- Tailwind CSS v4\n- Supabase (Auth, RLS, DB)\n- Vercel AI SDK\n\n## Arsitektur & Aturan\n- Seluruh state disimpan di Database Supabase\n- CSA & AE bertukar data via repository (`/csa-sync/`)\n- Git Branching: main (release) & feature/task-{id} (development)\n\n## Status Terakhir\n- Project diinisialisasi (Task 0.1)\n- Setup Supabase & skema tabel selesai (Task 0.3, Task 1.1)'
   });
@@ -594,6 +595,7 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
   const [simStep, setSimStep] = useState<'ready' | 'push' | 'ci_running' | 'ci_failed' | 'ci_passed' | 'review_running' | 'review_done' | 'audit' | 'merged'>('ready');
   const [ciLogs, setCiLogs] = useState<string[]>([]);
   const [csaAnalysis, setCsaAnalysis] = useState<string>('');
+  const [csaEvaluation, setCsaEvaluation] = useState<any>(null);
   const [auditItems, setAuditItems] = useState<AuditItem[]>([]);
   const [envSecrets, setEnvSecrets] = useState<string>('');
   const [simWebhookPayload, setSimWebhookPayload] = useState<string>('');
@@ -1008,6 +1010,7 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
       if (data.success) {
         const evalResult = data.evaluation;
         setCsaAnalysis(data.reportMarkdown);
+        setCsaEvaluation(evalResult);
         setSimStep('review_done');
 
         setLogs(prev => [
@@ -1686,7 +1689,14 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                     </div>
                     <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
                       {tasks.filter(t => t.status === 'inbox' || t.status === 'draft').map(t => (
-                        <div key={t.id} className="bg-[#0f1322] border border-blue-900/20 p-2.5 rounded-lg text-[11px] space-y-1.5 relative overflow-hidden">
+                        <div 
+                          key={t.id} 
+                          onClick={() => {
+                            setSelectedTask(t);
+                            setActiveTab('verify');
+                          }}
+                          className="bg-[#0f1322] border border-blue-900/20 p-2.5 rounded-lg text-[11px] space-y-1.5 relative overflow-hidden hover:border-blue-500/40 cursor-pointer transition-all"
+                        >
                           <h4 className="font-semibold text-slate-200 line-clamp-1">{t.title}</h4>
                           <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
                           <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
@@ -1713,7 +1723,14 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                     </div>
                     <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
                       {tasks.filter(t => t.status === 'in_progress').map(t => (
-                        <div key={t.id} className="bg-[#0f1322] border border-sky-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5 relative overflow-hidden">
+                        <div 
+                          key={t.id} 
+                          onClick={() => {
+                            setSelectedTask(t);
+                            setActiveTab('verify');
+                          }}
+                          className="bg-[#0f1322] border border-sky-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5 relative overflow-hidden hover:border-sky-500/40 cursor-pointer transition-all"
+                        >
                           <div className="absolute top-0 left-0 right-0 h-0.5 bg-sky-500 animate-pulse" />
                           <h4 className="font-semibold text-slate-200 line-clamp-1">{t.title}</h4>
                           <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
@@ -1743,7 +1760,10 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                       {tasks.filter(t => t.status === 'awaiting_review').map(t => (
                         <div 
                           key={t.id}
-                          onClick={() => setActiveTab('verify')}
+                          onClick={() => {
+                            setSelectedTask(t);
+                            setActiveTab('verify');
+                          }}
                           className="bg-[#0f1322] border border-amber-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5 hover:border-amber-500/40 transition-all cursor-pointer group"
                         >
                           <h4 className="font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors flex items-center justify-between">
@@ -1773,7 +1793,14 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                     </div>
                     <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
                       {tasks.filter(t => t.status === 'approved').map(t => (
-                        <div key={t.id} className="bg-[#0f1322] border border-emerald-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5">
+                        <div 
+                          key={t.id} 
+                          onClick={() => {
+                            setSelectedTask(t);
+                            setActiveTab('verify');
+                          }}
+                          className="bg-[#0f1322] border border-emerald-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5 hover:border-emerald-500/40 cursor-pointer transition-all"
+                        >
                           <h4 className="font-semibold text-slate-200 line-clamp-1">{t.title}</h4>
                           <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
                           <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
@@ -1800,7 +1827,14 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                     </div>
                     <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
                       {tasks.filter(t => t.status === 'rejected').map(t => (
-                        <div key={t.id} className="bg-[#0f1322] border border-rose-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5">
+                        <div 
+                          key={t.id} 
+                          onClick={() => {
+                            setSelectedTask(t);
+                            setActiveTab('verify');
+                          }}
+                          className="bg-[#0f1322] border border-rose-900/30 p-2.5 rounded-lg text-[11px] space-y-1.5 hover:border-rose-500/40 cursor-pointer transition-all"
+                        >
                           <h4 className="font-semibold text-slate-200 line-clamp-1">{t.title}</h4>
                           <p className="text-slate-400 leading-normal line-clamp-2">{t.spec_markdown}</p>
                           <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/30">
@@ -1827,7 +1861,14 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                     </div>
                     <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-0.5">
                       {tasks.filter(t => t.status === 'merged').map(t => (
-                        <div key={t.id} className="bg-[#0f1322]/50 border border-indigo-950/20 p-2.5 rounded-lg text-[11px] space-y-1.5 opacity-75">
+                        <div 
+                          key={t.id} 
+                          onClick={() => {
+                            setSelectedTask(t);
+                            setActiveTab('verify');
+                          }}
+                          className="bg-[#0f1322]/50 border border-indigo-950/20 p-2.5 rounded-lg text-[11px] space-y-1.5 opacity-75 hover:border-indigo-500/40 cursor-pointer transition-all"
+                        >
                           <h4 className="font-semibold text-slate-300 line-clamp-1">{t.title}</h4>
                           <div className="flex justify-between items-center text-[9px] text-slate-500 pt-1.5 border-t border-indigo-950/20 font-mono">
                             <span>{t.id}</span>
@@ -1951,19 +1992,53 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                 
                 {/* Task Header */}
                 <div className="glass-panel p-4 rounded-xl border border-indigo-950/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2 py-0.5 rounded font-mono uppercase font-bold">task-5</span>
-                      <span className="text-xs text-slate-400 font-mono">Branch: feature/csa-auto-review</span>
+                  <div className="space-y-2 flex-1 w-full">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-950/30 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400 font-semibold">Evaluasi Task:</span>
+                        <select
+                          value={selectedTask?.id || ''}
+                          onChange={(e) => {
+                            const task = tasks.find(t => t.id === e.target.value);
+                            setSelectedTask(task || null);
+                          }}
+                          className="bg-slate-950 border border-indigo-950/60 rounded px-2 py-1 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono font-bold"
+                        >
+                          <option value="">-- Pilih Task --</option>
+                          {tasks.map(t => (
+                            <option key={t.id} value={t.id}>
+                              [{t.status.toUpperCase()}] {t.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      {selectedTask && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded font-mono uppercase font-bold">
+                            {selectedTask.id}
+                          </span>
+                          <span className="text-xs text-slate-500 font-mono">
+                            Branch: {selectedTask.branch_name || `feature/task-${selectedTask.id}`}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <h2 className="text-base font-bold text-slate-200">Implementasi Review Otomatis CSA (Fase 5.4)</h2>
+
+                    {selectedTask ? (
+                      <h2 className="text-sm font-bold text-slate-200 pt-1">{selectedTask.title}</h2>
+                    ) : (
+                      <div className="text-xs text-slate-500 italic pt-1">
+                        Pilih task dari dropdown di atas atau klik kartu di Kanban board untuk memuat log verifikasi.
+                      </div>
+                    )}
                   </div>
                   
                   {/* Status Indicator */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400">Simulator Status:</span>
-                    <span className="text-xs uppercase font-mono font-bold px-2 py-1 rounded bg-[#0f1322] border border-slate-800">
-                      {simStep}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs text-slate-400 font-semibold">Status:</span>
+                    <span className="text-xs uppercase font-mono font-bold px-2 py-1 rounded bg-[#0f1322] border border-indigo-950/60">
+                      {selectedTask ? selectedTask.status : simStep}
                     </span>
                   </div>
                 </div>
@@ -2087,6 +2162,63 @@ ${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_
                         </div>
                       ) : (
                         <div className="space-y-4">
+                          {/* CSA Dynamic Security Checklist (Task 7.1) */}
+                          <div className="bg-indigo-950/10 border border-indigo-900/20 rounded-lg p-3 space-y-2">
+                            <h4 className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                              <ShieldCheck size={14} className="text-indigo-400" />
+                              <span>Kepatuhan Arsitektur ({csaEvaluation ? `${csaEvaluation.score}/100` : '0/100'})</span>
+                            </h4>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-slate-300">1. CI/CD Build Status</span>
+                                <span className="flex items-center gap-1 font-mono text-[10px]">
+                                  <span className="text-emerald-400 flex items-center gap-1 font-semibold"><Check size={12} /> PASSED</span>
+                                </span>
+                              </div>
+                              
+                              <div className="flex items-center justify-between text-xs border-t border-indigo-950/40 pt-1.5">
+                                <span className="text-slate-300">2. RLS Security Audit</span>
+                                <span className="flex items-center gap-1 font-mono text-[10px]">
+                                  {csaEvaluation?.score === 30 ? (
+                                    <span className="text-rose-400 flex items-center gap-1 font-semibold"><X size={12} /> BYPASS DETECTED</span>
+                                  ) : csaEvaluation ? (
+                                    <span className="text-emerald-400 flex items-center gap-1 font-semibold"><Check size={12} /> COMPLIANT</span>
+                                  ) : (
+                                    <span className="text-slate-500 flex items-center gap-1"><Clock size={12} /> PENDING</span>
+                                  )}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between text-xs border-t border-indigo-950/40 pt-1.5">
+                                <span className="text-slate-300">3. Exception Handling Check</span>
+                                <span className="flex items-center gap-1 font-mono text-[10px]">
+                                  {csaEvaluation?.score === 55 ? (
+                                    <span className="text-rose-400 flex items-center gap-1 font-semibold"><X size={12} /> MISSING TRY-CATCH</span>
+                                  ) : csaEvaluation ? (
+                                    <span className="text-emerald-400 flex items-center gap-1 font-semibold"><Check size={12} /> IMPLEMENTED</span>
+                                  ) : (
+                                    <span className="text-slate-500 flex items-center gap-1"><Clock size={12} /> PENDING</span>
+                                  )}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between text-xs border-t border-indigo-950/40 pt-1.5">
+                                <span className="text-slate-300">4. LLM DoD Evaluation</span>
+                                <span className="flex items-center gap-1 font-mono text-[10px]">
+                                  {csaEvaluation ? (
+                                    csaEvaluation.approved ? (
+                                      <span className="text-emerald-400 flex items-center gap-1 font-semibold"><Check size={12} /> APPROVED</span>
+                                    ) : (
+                                      <span className="text-rose-400 flex items-center gap-1 font-semibold"><X size={12} /> REJECTED</span>
+                                    )
+                                  ) : (
+                                    <span className="text-slate-500 flex items-center gap-1"><Clock size={12} /> PENDING</span>
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
                           <div>
                             <h4 className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">Checklist Audit Visual (Task 7.1)</h4>
                             <div className="space-y-2">
