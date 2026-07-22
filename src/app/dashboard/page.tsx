@@ -298,6 +298,26 @@ export default function Home() {
     }
   };
 
+  const fetchProjectState = async () => {
+    if (!activeProject) return;
+    try {
+      const { data, error } = await supabase
+        .from('project_state')
+        .select('*')
+        .eq('project_id', activeProject.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setProjectState({
+          context_markdown: data.context_markdown || ''
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching project state:', err);
+    }
+  };
+
   const handleGenerateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim() || !activeProject) return;
@@ -467,8 +487,9 @@ export default function Home() {
 
     fetchDecisions();
     fetchTasks();
+    fetchProjectState();
 
-    // Setup Supabase realtime subscriptions for both tasks and decisions tables
+    // Setup Supabase realtime subscriptions for tasks, decisions, and project_state tables
     const tasksChannel = supabase
       .channel('tasks-realtime')
       .on(
@@ -507,9 +528,29 @@ export default function Home() {
       )
       .subscribe();
 
+    const stateChannel = supabase
+      .channel('state-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'project_state'
+        },
+        (payload: any) => {
+          console.log('[Realtime] Project state change detected:', payload);
+          if ((payload.new && payload.new.project_id === activeProject.id) || 
+              (payload.old && payload.old.project_id === activeProject.id)) {
+            fetchProjectState();
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(tasksChannel);
       supabase.removeChannel(decisionsChannel);
+      supabase.removeChannel(stateChannel);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProject]);
@@ -1536,12 +1577,35 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
                   <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-indigo-950/40 h-[450px]">
                     <div className="p-4 overflow-y-auto">
                       <pre className="font-mono text-xs text-slate-300 whitespace-pre-wrap leading-relaxed">
-                        {prd}
+                        {(() => {
+                          const text = projectState.context_markdown || '';
+                          const prdIndex = text.search(/#+ (Product Requirements Document|PRD)/i);
+                          const brdIndex = text.search(/#+ (Business Requirements Document|BRD)/i);
+                          if (prdIndex !== -1 && brdIndex !== -1) {
+                            return prdIndex < brdIndex 
+                              ? text.substring(prdIndex, brdIndex).trim() 
+                              : text.substring(prdIndex).trim();
+                          }
+                          return text;
+                        })()}
                       </pre>
                     </div>
                     <div className="p-4 overflow-y-auto">
                       <pre className="font-mono text-xs text-slate-300 whitespace-pre-wrap leading-relaxed">
-                        {brd}
+                        {(() => {
+                          const text = projectState.context_markdown || '';
+                          const prdIndex = text.search(/#+ (Product Requirements Document|PRD)/i);
+                          const brdIndex = text.search(/#+ (Business Requirements Document|BRD)/i);
+                          if (prdIndex !== -1 && brdIndex !== -1) {
+                            return prdIndex < brdIndex 
+                              ? text.substring(brdIndex).trim() 
+                              : text.substring(brdIndex, prdIndex).trim();
+                          }
+                          return `# Business Requirements Document (BRD)
+
+## Keputusan Arsitektur Terdaftar (Tabel decisions):
+${decisions.map((d, i) => `${i + 1}. **${d.decision_text}**\n   _${d.reasoning}_`).join('\n\n') || 'Belum ada keputusan.'}`;
+                        })()}
                       </pre>
                     </div>
                   </div>
