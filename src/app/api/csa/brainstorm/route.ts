@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const { prompt, projectId, model = 'gemini-3.5-flash' } = await request.json();
+    const { prompt, chatHistory = [], projectId, model = 'gemini-3.5-flash' } = await request.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -37,14 +37,25 @@ export async function POST(request: Request) {
       }
     }
 
-    // Construct structured prompt combining current context and user query
+    // Format chat history
+    let formattedHistory = '';
+    if (chatHistory && chatHistory.length > 0) {
+      formattedHistory = chatHistory
+        .map((msg: any) => `${msg.sender === 'user' ? 'Pengguna' : 'CSA'}: ${msg.text}`)
+        .join('\n\n');
+    }
+
+    // Construct structured prompt combining current context, chat history, and user query
     const combinedPrompt = `
 Berikut adalah status arsitektur proyek saat ini (sebagai acuan konteks):
 ---
 ${projectContext || '(Belum ada deskripsi arsitektur proyek terdaftar)'}
 ---
 
-Usulan desain / Permintaan brainstorming dari pengguna:
+Berikut adalah riwayat percakapan sesi brainstorming sebelumnya:
+${formattedHistory || '(Belum ada riwayat percakapan)'}
+
+Pesan terbaru dari Pengguna (jawab pesan ini dengan mempertimbangkan riwayat percakapan di atas):
 ${prompt}
 `;
 

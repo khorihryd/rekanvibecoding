@@ -835,6 +835,7 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: userMsg.text,
+          chatHistory: messages.map(m => ({ sender: m.sender, text: m.text })),
           projectId: activeProject?.id || null,
           model: selectedModel
         })
