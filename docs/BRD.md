@@ -32,7 +32,7 @@ Semakin banyak individu non-teknis membangun produk software lewat AI ("vibe cod
 
 Untuk mendukung keberlanjutan produk, aplikasi CSA menerapkan dual-mode pengoperasian:
 1. **Mode Hosted (SaaS):** Pengguna menggunakan API key LLM & infrastruktur server yang disediakan oleh CSA. Penggunaan ini dikenakan biaya berbasis **Sistem Token** (kredit pemakaian) yang dikurangi setiap kali melakukan brainstorming, dekomposisi task, atau audit kode otomatis.
-2. **Mode Self-Hosted (Bring Your Own Key):** Pengguna dapat memasukkan API Key LLM mereka sendiri (OpenAI, Google Gemini, dll) pada pengaturan proyek. Pada mode ini, pemakaian token di-bypass (gratis untuk akses server CSA), dan pengguna membayar biaya langganan bulanan (*subscription*) dasar yang lebih murah untuk penggunaan platform saja.
+2. **Mode Self-Hosted (Bring Your Own Key):** Pengguna memasukkan API key LLM miliknya sendiri, tidak dikenakan biaya apa pun ke pemilik produk (100% gratis untuk akses platform). Biaya yang timbul hanya dari pemakaian API key milik pengguna sendiri ke provider AI pilihannya.
 
 ## 4. Pemangku Kepentingan (Stakeholders)
 

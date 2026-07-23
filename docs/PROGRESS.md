@@ -425,4 +425,18 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
+- **Koreksi 5 — Kembalikan Model Self-Hosted 100% Gratis & Tambah Link Donasi**
+
+---
+
+### Koreksi 5 — Kembalikan Model Self-Hosted 100% Gratis & Tambah Link Donasi
+- **Status:** Selesai
+- **Tanggal:** 2026-07-23
+- **Ringkasan:** Memperbaiki penyimpangan keputusan bisnis yang tidak sengaja terbuat pada Koreksi 4 di `docs/BRD.md` dengan menghapus referensi biaya langganan bulanan pada mode Self-Hosted dan memperjelas statusnya yang 100% gratis dari biaya platform. Menyesuaikan deskripsi subtask di `docs/ROADMAP.md` Fase 7.5 untuk memastikan pemotongan token/saldo di-bypass sepenuhnya pada mode Self-Hosted. Serta menambahkan bagian donasi sukarela beserta placeholder PayPal link di `README.md`.
+- **File berubah:** `docs/BRD.md`, `docs/ROADMAP.md`, `README.md`
+- **Catatan untuk manusia:** Ini adalah **koreksi atas penyimpangan keputusan bisnis** yang sempat terjadi di Koreksi 4. Mode Self-Hosted kini secara formal dideklarasikan gratis penuh (tanpa biaya platform), dan ajakan donasi sukarela ber-placeholder telah ditambahkan ke berkas README root.
+
+---
+
+## Task Berikutnya yang Akan Dikerjakan
 - **Fase 7.5 — Task 7.5.1: Skema Database & Model Token (Belum Dikerjakan)**

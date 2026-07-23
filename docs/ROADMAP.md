@@ -219,10 +219,10 @@
 
 ## Fase 7.5 — Mode Self-Hosted vs Hosted & Sistem Token
 
-**Tujuan fase:** Mendukung monetisasi platform melalui kuota token (mode Hosted) dan opsi bring-your-own-key (mode Self-Hosted) untuk fleksibilitas pengguna.
+**Tujuan fase:** Mendukung monetisasi platform melalui kuota token (mode Hosted) dan opsi bring-your-own-key (mode Self-Hosted yang 100% gratis dari biaya platform) untuk fleksibilitas pengguna.
 
 ### Task 7.5.1 — Skema Database & Model Token
-- Buat skema tabel `tokens` dan kolom pencatatan kuota transaksi pemakaian API LLM per proyek/user.
+- Buat skema tabel `tokens` dan kolom pencatatan kuota transaksi pemakaian API LLM per proyek/user (khusus untuk pencatatan di mode Hosted).
 - **Selesai jika:** tabel kuota terbuat di Supabase, RLS aktif, dan relasi data token/pemakaian terverifikasi.
 
 ### Task 7.5.2 — Konfigurasi Mode Self-Hosted (API Key User)
@@ -230,16 +230,16 @@
 - **Selesai jika:** API key dapat disimpan oleh pengguna dan divalidasi keaktifannya.
 
 ### Task 7.5.3 — Konfigurasi Mode Hosted (Sistem Token Admin)
-- Implementasikan pemotongan saldo token pengguna saat menggunakan endpoint AI bawaan dari platform CSA.
-- **Selesai jika:** transaksi kredit token terpotong otomatis setiap kali memicu request AI hosted.
+- Implementasikan pemotongan saldo token pengguna saat menggunakan endpoint AI bawaan dari platform CSA. Logika pemotongan token ini harus sepenuhnya dinonaktifkan di mode Self-Hosted.
+- **Selesai jika:** transaksi kredit token terpotong otomatis setiap kali memicu request AI hosted, sedangkan pada mode Self-Hosted berjalan bypass tanpa pemotongan saldo.
 
 ### Task 7.5.4 — Middleware Pembatasan Akses & Token Check
-- Buat middleware verifikasi sisa kuota token atau ketersediaan personal API key sebelum mengizinkan request API routes arsitektur.
-- **Selesai jika:** request diblokir otomatis dengan kode error 402/403 saat token habis dan personal API key kosong.
+- Buat middleware verifikasi sisa kuota token (untuk mode Hosted) atau ketersediaan personal API key (untuk mode Self-Hosted) sebelum mengizinkan request API routes arsitektur.
+- **Selesai jika:** request diblokir otomatis dengan kode error 402/403 saat token habis pada mode Hosted, sedangkan pada mode Self-Hosted request dilayani gratis tanpa pemotongan selama personal API key terisi dan valid.
 
 ### Task 7.5.5 — UI Dashboard Saldo & Token Usage
-- Tambahkan card visual untuk memantau status pemakaian token, riwayat transaksi kuota, serta toggle switch/mode deployment.
-- **Selesai jika:** widget menampilkan data saldo riil pengguna dari database secara reaktif.
+- Tambahkan card visual untuk memantau status pemakaian token, riwayat transaksi kuota (khusus mode Hosted), serta toggle switcher/mode deployment.
+- **Selesai jika:** widget menampilkan data saldo/pemakaian secara reaktif di mode Hosted, dan menampilkan informasi status "Self-Hosted: Aktif & Gratis" di mode Self-Hosted.
 
 ### Task 7.5.6 — Switcher Mode Deployment & Uji Validasi
 - Sediakan switcher global di dashboard untuk mengubah status proyek dari mode hosted ke self-hosted beserta pengujian E2E kedua mode.

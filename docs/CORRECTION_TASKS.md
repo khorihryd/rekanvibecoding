@@ -71,6 +71,28 @@ Dokumen ini berisi task koreksi atas temuan review terhadap `docs/PROGRESS.md` y
 
 ---
 
+## Koreksi 5 — Kembalikan Model Self-Hosted 100% Gratis & Tambah Link Donasi
+
+**Masalah:** Saat mengerjakan Koreksi 4 (sinkronisasi dokumen), `docs/BRD.md` section 3.1 secara tidak sengaja diubah substansinya — menambahkan biaya langganan bulanan untuk mode self-hosted. Ini bertentangan dengan keputusan yang sudah disepakati sejak awal: **mode self-hosted harus 100% gratis** (user hanya menanggung biaya API key miliknya sendiri, tanpa biaya langganan apa pun ke pemilik produk). Perubahan substansi ini juga tidak dicatat sebagai catatan eksplisit untuk ditinjau manusia, padahal `AGENTS.md` mewajibkan itu.
+
+**Definisi Selesai:**
+- Revisi `docs/BRD.md` section 3.1: hapus kalimat yang menyebut biaya langganan bulanan untuk mode self-hosted. Tulis ulang jadi eksplisit: *"Mode Self-Hosted (Bring Your Own Key): pengguna memasukkan API key LLM miliknya sendiri, tidak dikenakan biaya apa pun ke pemilik produk (100% gratis untuk akses platform). Biaya yang timbul hanya dari pemakaian API key milik pengguna sendiri ke provider AI pilihannya."*
+- Cek dan sesuaikan `docs/ROADMAP.md` Fase 7.5, khususnya task yang berkaitan dengan pemotongan saldo/token — pastikan skema pemotongan token/billing **hanya berlaku di mode Hosted**, dan mode Self-Hosted tidak pernah memicu pemotongan saldo atau permintaan pembayaran apa pun
+- Tambahkan section baru di `README.md` (root repo) berisi ajakan donasi sukarela, dengan placeholder link yang nanti diisi manual oleh pemilik project, contoh:
+  ```md
+  ## Dukung Project Ini
+
+  Rekanvibecoding open source dan mode self-hosted-nya 100% gratis untuk digunakan. Kalau project ini membantu kamu, kamu bisa mendukung pengembangannya lewat donasi sukarela:
+
+  [Donasi lewat PayPal](PASTE_PAYPAL_LINK_DI_SINI)
+  ```
+- **Jangan** menebak atau mengarang link PayPal apa pun — biarkan placeholder `PASTE_PAYPAL_LINK_DI_SINI` apa adanya, karena link asli akan diisi manual oleh pemilik project di luar sesi AI ini
+- Update `docs/PROGRESS.md`: catat eksplisit di catatan bahwa ini adalah **koreksi atas penyimpangan keputusan bisnis** yang terjadi di Koreksi 4, bukan sekadar update biasa
+
+**Catatan khusus untuk AI Engineer:** Ini kesalahan yang sama jenisnya dengan sebelumnya (menganggap "sinkronisasi dokumen" sebagai kesempatan menulis ulang isi, bukan menyalin persis apa yang sudah disepakati). Untuk task dokumentasi ke depannya: **salin/pertahankan keputusan yang sudah eksplisit disepakati, jangan diinterpretasikan ulang** — kalau ada yang terasa perlu diubah substansinya, tulis sebagai pertanyaan/catatan untuk manusia dulu, jangan langsung diubah.
+
+---
+
 ## Catatan untuk Update `PROGRESS.md`
 
 Setelah tiap koreksi di atas selesai, jangan hanya tandai "Selesai" — tuliskan juga secara eksplisit di kolom catatan bahwa ini **koreksi dari implementasi mock/simulasi sebelumnya**, dan sertakan bukti verifikasi nyata (misalnya: link commit AGENTS.md di repo, atau nomor PR yang benar ter-merge) supaya klaim "selesai" berikutnya bisa dipercaya tanpa perlu direview ulang dari nol.
