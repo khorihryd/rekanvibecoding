@@ -772,41 +772,6 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
         sender: 'csa',
         text: 'Halo! Saya adalah Chief Software Architect (CSA) Anda. Saya di sini untuk membantu merancang arsitektur aplikasi, menjaga konsistensi kode, memecah rencana menjadi task terstruktur, dan memverifikasi pekerjaan AI Engineer (AE) Anda.\n\nApa proyek yang ingin Anda bangun hari ini?',
         timestamp: new Date(Date.now() - 3600000 * 3)
-      },
-      {
-        id: 'msg-2',
-        sender: 'user',
-        text: 'Saya ingin membangun aplikasi rekanvibecoding — sebuah platform SaaS visual bagi vibe coder untuk berkolaborasi dengan asisten AI.',
-        timestamp: new Date(Date.now() - 3600000 * 2.9)
-      },
-      {
-        id: 'msg-3',
-        sender: 'csa',
-        text: 'Menarik! Berdasarkan ide tersebut, saya menyarankan arsitektur Next.js 16 + Tailwind CSS v4 + Supabase + Vercel AI SDK.\n\nBerikut beberapa keputusan arsitektur awal yang saya catat:\n1. Next.js 16 App Router (React 19) sebagai core frontend.\n2. Supabase PostgreSQL & Auth untuk backend, memanfaatkan RLS (Row Level Security).\n3. folder `/csa-sync/` di GitHub untuk sync file dengan AI Engineer (file-based sync).\n\nApakah ini disetujui? Jika ya, saya akan generate dokumen spesifikasi (PRD/BRD) dan membuat daftar task awal.',
-        timestamp: new Date(Date.now() - 3600000 * 2.8),
-        decisionsGenerated: [
-          { text: 'Menggunakan Next.js 16 App Router dengan TypeScript', reasoning: 'Mendukung React 19 Server Components untuk performa optimal dan rendering terstruktur.' },
-          { text: 'Menggunakan Supabase untuk Auth, DB PostgreSQL, dan RLS', reasoning: 'Memangkas waktu setup backend dan menjamin keamanan.' },
-          { text: 'Arsitektur sinkronisasi file-based lewat folder /csa-sync/', reasoning: 'Menjamin CSA tidak tergantung pada API agent eksternal.' }
-        ]
-      },
-      {
-        id: 'msg-4',
-        sender: 'user',
-        text: 'Ya, disetujui. Silakan buat dokumen PRD/BRD dan task-tasknya.',
-        timestamp: new Date(Date.now() - 3600000 * 2.7)
-      },
-      {
-        id: 'msg-5',
-        sender: 'csa',
-        text: 'Bagus! Saya telah menyimpan keputusan tersebut ke database. Saya juga telah membuat draf dokumen PRD & BRD awal yang dapat Anda lihat pada tab **Specifications**.\n\nSaya telah memecah project menjadi beberapa task dari Fase 0 (Inisialisasi) hingga Fase 7 (Merge Gate). Task-task awal sudah di-push ke repository Anda dalam folder `csa-sync/inbox/`.\n\nSaat ini, tugas AI Engineer Anda adalah mengambil task aktif pertama untuk mulai menulis kode. Silakan pantau status pengerjaan di tab **Kanban Board**.',
-        timestamp: new Date(Date.now() - 3600000 * 2.6),
-        tasksGenerated: [
-          { title: 'Inisialisasi Project Next.js (Fase 0.1)', spec: 'Setup project Next.js + TS + Tailwind CSS. Konfigurasi folder `src/app`.' },
-          { title: 'Setup Database Supabase & Skema Awal', spec: 'Membuat project Supabase dan migrasi database untuk tabel projects, tasks, decisions.' },
-          { title: 'Setup GitHub OAuth & Octokit Client', spec: 'Implementasi otentikasi GitHub dan integrasi SDK Octokit.' },
-          { title: 'UI Chat Brainstorming & Keputusan Otomatis', spec: 'Membuat chat box dan menyimpan keputusan baru.' }
-        ]
       }
     ]);
 
