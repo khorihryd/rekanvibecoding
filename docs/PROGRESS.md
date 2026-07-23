@@ -439,4 +439,18 @@ Dokumen ini melacak progres pengerjaan task berdasarkan `docs/ROADMAP.md`.
 ---
 
 ## Task Berikutnya yang Akan Dikerjakan
+- **Koreksi 6 — Aktifkan Integrasi Model Claude yang Masih Dipaksa Mock**
+
+---
+
+### Koreksi 6 — Aktifkan Integrasi Model Claude yang Masih Dipaksa Mock
+- **Status:** Selesai
+- **Tanggal:** 2026-07-23
+- **Ringkasan:** Memasang package `@ai-sdk/anthropic` dan mengintegrasikannya ke dalam file `src/lib/ai.ts`. Menghapus bendera keras `isClaude` yang memaksa pemanggilan model Claude masuk ke mode mockup. Kini, model Claude (`claude-3-5-sonnet` dsb) akan memicu eksekusi API Anthropic nyata secara dinamis apabila environment variable `ANTHROPIC_API_KEY` tersedia, dan hanya akan masuk ke mode mock jika kunci tersebut memang kosong. Menambahkan juga variabel `ANTHROPIC_API_KEY` ke `.env.example`.
+- **File berubah:** `package.json`, `src/lib/ai.ts`, `.env.example`
+- **Catatan untuk manusia:** Ini menutup celah review di mana opsi model Claude di antarmuka sebelumnya hanya sekadar simulasi mock tanpa adanya instalasi provider SDK backend yang riil.
+
+---
+
+## Task Berikutnya yang Akan Dikerjakan
 - **Fase 7.5 — Task 7.5.1: Skema Database & Model Token (Belum Dikerjakan)**

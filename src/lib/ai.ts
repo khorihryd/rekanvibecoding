@@ -1,6 +1,7 @@
 import { generateText } from 'ai';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,14 +25,15 @@ export async function generateTextContent(options: GenerateTextOptions): Promise
 
   const isGemini = model.startsWith('gemini');
   const isOpenAi = model.startsWith('gpt');
-  const isClaude = model.startsWith('claude'); // Claude fallback if client key not set, or we can use OpenAI/Gemini as fallback
+  const isClaude = model.startsWith('claude');
 
   // Check keys
   const geminiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   const openaiKey = process.env.OPENAI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   // Decide if we should run in Mock mode
-  const shouldMock = (isGemini && !geminiKey) || (isOpenAi && !openaiKey) || isClaude;
+  const shouldMock = (isGemini && !geminiKey) || (isOpenAi && !openaiKey) || (isClaude && !anthropicKey);
 
   if (shouldMock) {
     console.log(`[AI Engine Mock Mode] Simulating response for model: ${model}`);
@@ -69,7 +71,7 @@ Mengintegrasikan autentikasi GitHub OAuth agar pengguna dapat menghubungkan repo
       mockText = `Halo! Saya adalah CSA (Chief Software Architect) Engine. 
 Saya menerima instruksi Anda: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}".
 
-Ini adalah respon simulasi dalam mode offline. Untuk mengaktifkan respon AI sungguhan, pastikan Anda telah memasukkan \`GOOGLE_GENERATIVE_AI_API_KEY\` (untuk Gemini) atau \`OPENAI_API_KEY\` (untuk GPT) ke dalam berkas \`.env.local\` Anda.`;
+Ini adalah respon simulasi dalam mode offline. Untuk mengaktifkan respon AI sungguhan, pastikan Anda telah memasukkan \`GOOGLE_GENERATIVE_AI_API_KEY\` (untuk Gemini), \`OPENAI_API_KEY\` (untuk GPT), atau \`ANTHROPIC_API_KEY\` (untuk Claude) ke dalam berkas \`.env.local\` Anda.`;
     }
 
     return {
@@ -84,8 +86,10 @@ Ini adalah respon simulasi dalam mode offline. Untuk mengaktifkan respon AI sung
 
     if (isOpenAi) {
       aiModel = openai(model);
+    } else if (isClaude) {
+      aiModel = anthropic(model);
     } else {
-      // Default to Google Gemini if not OpenAI or specifically Gemini
+      // Default to Google Gemini if not OpenAI/Claude or specifically Gemini
       aiModel = google(model === 'gemini-3.5-flash' ? 'gemini-2.5-flash' : model);
     }
 

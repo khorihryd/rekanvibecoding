@@ -93,6 +93,21 @@ Dokumen ini berisi task koreksi atas temuan review terhadap `docs/PROGRESS.md` y
 
 ---
 
+## Koreksi 6 — Aktifkan Integrasi Model Claude yang Masih Dipaksa Mock
+
+**Masalah:** Di `src/lib/ai.ts`, ada logika `isClaude = model.startsWith('claude')` yang dipakai untuk memaksa `shouldMock` selalu `true` kapan pun model yang dipilih adalah Claude — terlepas dari apakah API key Anthropic tersedia atau tidak. Tidak ada package `@ai-sdk/anthropic` yang di-import sama sekali di codebase. Ini bertentangan dengan prinsip "model AI fleksibel, tidak terkunci ke satu provider" — saat ini hanya Gemini dan OpenAI yang benar-benar terhubung nyata, Claude selalu tampil sebagai opsi tapi diam-diam selalu berjalan dalam mode simulasi.
+
+**Definisi Selesai:**
+- Install package `@ai-sdk/anthropic` (via `npm install @ai-sdk/anthropic --save`)
+- Di `src/lib/ai.ts`, tambahkan inisialisasi provider Anthropic (mengikuti pola yang sudah ada untuk Gemini/OpenAI), dan hapus logika `isClaude` yang memaksa mock
+- `shouldMock` untuk model apa pun (termasuk Claude) hanya boleh `true` kalau API key yang relevan **memang tidak tersedia** di environment variable — bukan berdasarkan nama providernya
+- Tambahkan `ANTHROPIC_API_KEY` ke `.env.example` (tanpa nilai asli)
+- Pastikan UI pemilihan model (label "Hemat"/"Andal" dan semacamnya yang sudah dibuat sebelumnya) tetap konsisten menampilkan opsi Claude dengan benar, dan benar-benar memanggil API Anthropic saat dipilih dan API key tersedia
+- Uji: set `ANTHROPIC_API_KEY` nyata di environment lokal, pilih model Claude di UI, jalankan satu aksi (misal brainstorming), verifikasi responsnya benar berasal dari panggilan API Anthropic sungguhan (bukan mock) — bisa dicek lewat log/network request, bukan cuma asumsi dari tampilan UI
+- Update `docs/PROGRESS.md` dengan catatan eksplisit bahwa ini memperbaiki gap dari review sebelumnya (model Claude sebelumnya selalu ter-mock diam-diam)
+
+---
+
 ## Catatan untuk Update `PROGRESS.md`
 
 Setelah tiap koreksi di atas selesai, jangan hanya tandai "Selesai" — tuliskan juga secara eksplisit di kolom catatan bahwa ini **koreksi dari implementasi mock/simulasi sebelumnya**, dan sertakan bukti verifikasi nyata (misalnya: link commit AGENTS.md di repo, atau nomor PR yang benar ter-merge) supaya klaim "selesai" berikutnya bisa dipercaya tanpa perlu direview ulang dari nol.
