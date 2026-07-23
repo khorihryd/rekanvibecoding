@@ -64,6 +64,7 @@ interface Message {
   timestamp: Date;
   decisionsGenerated?: Array<{ text: string; reasoning: string }>;
   tasksGenerated?: Array<{ title: string; spec: string }>;
+  showActionButtons?: boolean;
 }
 
 interface Decision {
@@ -844,11 +845,19 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
       setIsTyping(false);
 
       if (data.success) {
+        let responseText = data.text;
+        let showActionButtons = false;
+        if (responseText.includes('[SHOW_GENERATE_TASKS_BUTTON]')) {
+          responseText = responseText.replace('[SHOW_GENERATE_TASKS_BUTTON]', '').trim();
+          showActionButtons = true;
+        }
+
         setMessages(prev => [...prev, {
           id: `msg-c-${Date.now()}`,
           sender: 'csa',
-          text: data.text,
-          timestamp: new Date()
+          text: responseText,
+          timestamp: new Date(),
+          showActionButtons
         }]);
       } else {
         setMessages(prev => [...prev, {
@@ -866,6 +875,141 @@ Menyediakan layer pengawasan kualitas otomatis untuk solo builder agar kode mere
         text: `Error menghubungi CSA Engine: ${err.message || err}`,
         timestamp: new Date()
       }]);
+    }
+  };
+
+  const handleDiscussFurther = () => {
+    setChatInput("Saya ingin merevisi / mendiskusikan bagian arsitektur: ");
+  };
+
+  const [isGeneratingFromBrainstorm, setIsGeneratingFromBrainstorm] = useState(false);
+
+  const handleGenerateTasksFromBrainstorm = async (proposalText: string) => {
+    if (!activeProject) {
+      alert('Pilih proyek terlebih dahulu.');
+      return;
+    }
+    if (!user) {
+      alert('Autentikasi diperlukan.');
+      return;
+    }
+
+    try {
+      setIsGeneratingFromBrainstorm(true);
+      setLogs(prev => [...prev, '[System] Sesi Brainstorming disetujui. Mengekstrak keputusan arsitektur...']);
+
+      // 1. Extract decisions from proposal text via API
+      const extractRes = await fetch('/api/csa/extract-decisions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: proposalText })
+      });
+      const extractData = await extractRes.json();
+      
+      if (!extractData.success) {
+        throw new Error(extractData.error || 'Gagal mengekstrak keputusan.');
+      }
+
+      const extractedDecisions = extractData.decisions || [];
+
+      // 2. Save extracted decisions into Supabase
+      setLogs(prev => [...prev, `[System] Menyimpan ${extractedDecisions.length} keputusan arsitektur ke database...`]);
+      for (const dec of extractedDecisions) {
+        const { error: insertErr } = await supabase
+          .from('decisions')
+          .insert([
+            {
+              project_id: activeProject.id,
+              decision_text: dec.text,
+              reasoning: dec.reasoning
+            }
+          ]);
+        if (insertErr) {
+          console.error('Error inserting decision:', insertErr);
+        }
+      }
+
+      await fetchDecisions();
+
+      // 3. Auto-generate the first task (Setup Project Architecture)
+      setLogs(prev => [...prev, '[System] Mendekomposisi spesifikasi task awal...']);
+      const generateRes = await fetch('/api/csa/generate-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: activeProject.id,
+          userId: user.id,
+          taskTitle: 'Inisialisasi Project dan Setup Arsitektur Dasar',
+          model: selectedModel
+        })
+      });
+      const generateData = await generateRes.json();
+
+      if (!generateData.success) {
+        throw new Error(generateData.error || 'Gagal mendekomposisi task awal.');
+      }
+
+      setLogs(prev => [...prev, `[System] Task "${generateData.task.title}" berhasil dibuat (Status: Draft).`]);
+
+      // 4. Sync task to GitHub if repo url is connected
+      if (activeProject.github_repo_url) {
+        setLogs(prev => [...prev, `[GitHub Sync] Menyinkronkan spesifikasi task ke branch "${generateData.task.branch_name}"...`]);
+        try {
+          const syncRes = await fetch('/api/github/sync-task', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              projectId: activeProject.id,
+              taskId: generateData.task.id,
+              repoUrl: activeProject.github_repo_url,
+              branchName: generateData.task.branch_name,
+              model: selectedModel
+            })
+          });
+          const syncData = await syncRes.json();
+          if (syncData.success) {
+            setLogs(prev => [...prev, `[GitHub Sync] ${syncData.message}`]);
+            
+            // Push active task status to inbox
+            const { error: statusErr } = await supabase
+              .from('tasks')
+              .update({ status: 'inbox' })
+              .eq('id', generateData.task.id);
+
+            if (!statusErr) {
+              setLogs(prev => [...prev, '[System] Task aktif berhasil dikirim ke folder csa-sync/inbox/ di GitHub.']);
+            }
+          }
+        } catch (syncErr: any) {
+          setLogs(prev => [...prev, `[GitHub Sync] Gagal: ${syncErr.message || syncErr}`]);
+        }
+      }
+
+      await fetchTasks();
+      
+      setNotifications(prev => [
+        ...prev,
+        { id: Date.now().toString(), text: 'Brainstorming disetujui! Task awal telah dibuat.', type: 'success' }
+      ]);
+
+      // Confetti feedback!
+      import('canvas-confetti').then((confetti) => {
+        confetti.default({
+          particleCount: 80,
+          spread: 60,
+          origin: { y: 0.8 }
+        });
+      });
+
+      // Switch active tab to Kanban Board automatically!
+      setActiveTab('board');
+
+    } catch (err: any) {
+      console.error('Error generating tasks from brainstorm:', err);
+      alert('Gagal memproses persetujuan arsitektur: ' + err.message);
+    } finally {
+      setIsGeneratingFromBrainstorm(false);
     }
   };
 
@@ -1627,6 +1771,36 @@ Seluruh pekerjaan Anda harus dikoordinasikan lewat folder \`csa-sync/\`:
                               >
                                 <Database size={10} />
                                 <span>Simpan Keputusan</span>
+                              </button>
+                            </div>
+                          )}
+
+                          {msg.showActionButtons && (
+                            <div className="mt-4 border-t border-indigo-950/40 pt-3 flex flex-wrap gap-2">
+                              <button
+                                onClick={() => handleGenerateTasksFromBrainstorm(msg.text)}
+                                disabled={isGeneratingFromBrainstorm}
+                                className={`text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 font-bold shadow-md shadow-emerald-950/20 ${isGeneratingFromBrainstorm ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              >
+                                {isGeneratingFromBrainstorm ? (
+                                  <>
+                                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span>Mengekstrak & Generate...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check size={12} />
+                                    <span>Setujui Arsitektur & Generate Task Awal</span>
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                onClick={handleDiscussFurther}
+                                disabled={isGeneratingFromBrainstorm}
+                                className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 font-semibold"
+                              >
+                                <MessageSquare size={12} />
+                                <span>Revisi Detail Arsitektur</span>
                               </button>
                             </div>
                           )}

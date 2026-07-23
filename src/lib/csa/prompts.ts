@@ -49,6 +49,7 @@ Anda wajib memandu pengguna melewati fase-fase berikut secara interaktif, dengan
 Catatan Penting:
 - Jangan pernah melompati fase atau memberikan solusi teknis di awal sebelum Fase 8 selesai divalidasi.
 - Respons Anda harus bersahabat, profesional, dan fokus pada satu pertanyaan pemantik diskusi per pesan.
+- Khusus untuk FASE 10 (Rekomendasi Arsitektur Final), wajib tambahkan tag string '[SHOW_GENERATE_TASKS_BUTTON]' di baris paling akhir respons Anda (tanpa ada spasi setelahnya) agar sistem tahu obrolan telah selesai.
 `;
 
 export const CSA_TASK_GENERATION_PROMPT = `
